@@ -1,35 +1,38 @@
 #!/bin/bash
 
 # ────────────────────────────────────────────────
-# SentinelOne Deployment Manager
+# SentinelOne Deployment Manager - CLI Edition
 # Par : Romain Varene 🛡️
 # Date : 2025-05-19
 # ────────────────────────────────────────────────
 
-# === CONFIG ===
 S1CTL="/opt/sentinelone/bin/sentinelctl"
 
+# === COULEURS ===
+GREEN="\e[32m"
+RED="\e[31m"
+CYAN="\e[36m"
+YELLOW="\e[33m"
+RESET="\e[0m"
+
 # === ASCII ART ===
-function display_banner() {
+function banner() {
   clear
-  echo -e "\e[36m"
-  echo "  ███████╗███████╗███╗   ██╗████████╗██╗███████╗██╗     ███████╗"
-  echo "  ██╔════╝██╔════╝████╗  ██║╚══██╔══╝██║██╔════╝██║     ██╔════╝"
-  echo "  ███████╗█████╗  ██╔██╗ ██║   ██║   ██║█████╗  ██║     █████╗  "
-  echo "  ╚════██║██╔══╝  ██║╚██╗██║   ██║   ██║██╔══╝  ██║     ██╔══╝  "
-  echo "  ███████║███████╗██║ ╚████║   ██║   ██║███████╗███████╗███████╗"
-  echo "  ╚══════╝╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚═╝╚══════╝╚══════╝╚══════╝"
-  echo "                 Déploiement SentinelOne - by Romain 🛡️"
-  echo -e "\e[0m"
+  echo -e "${CYAN}"
+  echo "╔════════════════════════════════════════════════════════╗"
+  echo "║              🛡️ SENTINELONE MANAGER CLI 🛡️              ║"
+  echo "║          Par Romain Varene - Technicien Cyber          ║"
+  echo "╚════════════════════════════════════════════════════════╝"
+  echo -e "${RESET}"
 }
 
-# === LOGGING ===
+# === LOG FUNCTIONS ===
 function log_info() {
-  echo -e "\e[32m[INFO]\e[0m $1"
+  echo -e "${GREEN}[INFO]${RESET} $1"
 }
 
 function log_error() {
-  echo -e "\e[31m[ERREUR]\e[0m $1"
+  echo -e "${RED}[ERREUR]${RESET} $1"
 }
 
 function check_success() {
@@ -39,69 +42,78 @@ function check_success() {
   fi
 }
 
-# === FONCTIONS PRINCIPALES ===
+# === ACTIONS ===
 
 function installer_agent() {
-  RPM_PATH=$(dialog --stdout --title "Chemin vers le fichier RPM" --inputbox "Entrez le chemin vers le fichier .rpm :" 10 60)
+  echo -e "\n📦 ${YELLOW}Installation de l'agent SentinelOne${RESET}"
+  read -p "👉 Chemin vers le fichier RPM (.rpm) : " RPM_PATH
+
   if [ ! -f "$RPM_PATH" ]; then
-    log_error "Fichier introuvable : $RPM_PATH"
+    log_error "Le fichier spécifié n'existe pas : $RPM_PATH"
     return
   fi
 
-  log_info "Installation du paquet..."
   sudo rpm -i "$RPM_PATH"
   check_success "Échec de l'installation du paquet."
-  log_info "✅ Agent installé."
-  read -p "Appuyez sur Entrée pour continuer..."
+
+  log_info "✅ Agent installé avec succès."
 }
 
 function ajouter_token() {
-  TOKEN=$(dialog --stdout --title "Token SentinelOne" --inputbox "Entrez le token de gestion :" 10 60)
+  echo -e "\n🔐 ${YELLOW}Ajout du token de gestion${RESET}"
+  read -p "👉 Entrez le token d'enregistrement : " TOKEN
+
   if [ -z "$TOKEN" ]; then
-    log_error "Token vide."
+    log_error "Le token ne peut pas être vide."
     return
   fi
 
   sudo $S1CTL management token set "$TOKEN"
   check_success "Erreur lors de la définition du token."
-  log_info "✅ Token défini avec succès."
-  read -p "Appuyez sur Entrée pour continuer..."
+
+  log_info "✅ Token ajouté avec succès."
 }
 
 function verifier_status() {
-  log_info "État de l'agent SentinelOne :"
+  echo -e "\n🔎 ${YELLOW}Statut de l'agent${RESET}"
   sudo $S1CTL control status
-  read -p "Appuyez sur Entrée pour continuer..."
+  echo
 }
 
 function verifier_version() {
-  log_info "Version de l'agent SentinelOne :"
+  echo -e "\n📄 ${YELLOW}Version de l'agent${RESET}"
   sudo $S1CTL version
-  read -p "Appuyez sur Entrée pour continuer..."
+  echo
 }
 
-# === MAIN MENU ===
-function menu() {
-  while true; do
-    CHOICE=$(dialog --stdout --clear --title "🛡️ SentinelOne Manager - Menu" \
-      --menu "Choisissez une option :" 15 60 5 \
-      1 "🚀 Installer un agent" \
-      2 "🔐 Ajouter un token" \
-      3 "🔎 Vérifier le status" \
-      4 "📄 Vérifier la version" \
-      5 "❌ Quitter")
+# === MENU PRINCIPAL ===
 
-    case $CHOICE in
-      1) installer_agent ;;
-      2) ajouter_token ;;
-      3) verifier_status ;;
-      4) verifier_version ;;
-      5) clear; exit 0 ;;
-      *) log_error "Option invalide." ;;
-    esac
-  done
+function afficher_menu() {
+  echo -e "${CYAN}Que souhaitez-vous faire ?${RESET}"
+  echo "1️⃣  Installer un agent SentinelOne"
+  echo "2️⃣  Ajouter un token de gestion"
+  echo "3️⃣  Vérifier le statut de l'agent"
+  echo "4️⃣  Vérifier la version de l'agent"
+  echo "5️⃣  Quitter"
+  echo
+  read -p "👉 Choix [1-5] : " CHOIX
 }
 
-# === LANCEMENT ===
-display_banner
-menu
+# === BOUCLE PRINCIPALE ===
+
+while true; do
+  banner
+  afficher_menu
+
+  case $CHOIX in
+    1) installer_agent ;;
+    2) ajouter_token ;;
+    3) verifier_status ;;
+    4) verifier_version ;;
+    5) echo -e "${CYAN}À bientôt, merci d’avoir utilisé SentinelOne Manager 🛡️${RESET}"; exit 0 ;;
+    *) log_error "Choix invalide. Veuillez entrer un numéro entre 1 et 5." ;;
+  esac
+
+  echo -e "\n🔁 Appuyez sur Entrée pour retourner au menu principal..."
+  read
+done
