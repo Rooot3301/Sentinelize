@@ -2,7 +2,7 @@
 
 # ────────────────────────────────────────────────
 # SentinelOne Deployment Manager - CLI Edition
-# Auteur : Romain Varene
+# Auteur : Root3301
 # Date   : 2025-05-19
 # ────────────────────────────────────────────────
 
@@ -21,7 +21,7 @@ function banner() {
   echo -e "${CYAN}"
   echo "╔════════════════════════════════════════════════════════╗"
   echo "║             SENTINELONE MANAGER - TERMINAL             ║"
-  echo "║        Interface interactive - Romain Varene           ║"
+  echo "║v1.0                   By Root3301                      ║"
   echo "╚════════════════════════════════════════════════════════╝"
   echo -e "${RESET}"
 }
