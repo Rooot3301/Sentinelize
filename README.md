@@ -1,45 +1,50 @@
-README - SentinelOne Deployment Manager CLI
-Description
-Ce script Bash SentinelOne Deployment Manager - CLI Edition permet de gérer facilement l’installation, la configuration et le suivi d’un agent SentinelOne sur une machine Linux via une interface en ligne de commande simple et interactive.
+🛡️ SentinelOne Deployment Manager - CLI Edition
+🚀 Présentation
+Bienvenue dans SentinelOne Deployment Manager - CLI Edition !
+Un script Bash simple, interactif et efficace pour gérer l'installation et la configuration de l'agent SentinelOne sur Linux.
 
-Il a été développé par Romain Varene et facilite les opérations courantes suivantes :
+Ce script permet de :
 
-Installation de l’agent SentinelOne à partir d’un fichier RPM.
+Installer un agent SentinelOne à partir d'un fichier RPM
 
-Ajout du token de gestion pour enregistrer l’agent auprès de la console SentinelOne.
+Ajouter un token de gestion pour l'enregistrement auprès de la console SentinelOne
 
-Vérification du statut de l’agent.
+Vérifier le statut de l'agent en temps réel
 
-Consultation de la version installée de l’agent.
+Consulter la version installée de l'agent
 
-Prérequis
-Système Linux avec accès sudo.
+Auteur : Romain Varene
+Date : 19 mai 2025
 
-SentinelOne installé dans /opt/sentinelone/bin/sentinelctl (modifiable dans le script via la variable S1CTL).
+🛠️ Prérequis
+Distribution Linux avec accès sudo
 
-Fichier d’installation RPM de l’agent SentinelOne.
+Fichier RPM de l'agent SentinelOne prêt à être installé
 
-Token de gestion SentinelOne pour l’enregistrement.
+Token de gestion SentinelOne
 
-Bash shell (le script est compatible avec Bash).
+Bash shell
 
-Installation et lancement
-Récupérer le script
-Copier le script dans un fichier, par exemple sentinelone_manager.sh.
+Chemin de l’outil sentinelctl par défaut : /opt/sentinelone/bin/sentinelctl
 
-Rendre le script exécutable
+📥 Installation & Lancement
+Téléchargez ou copiez le script dans un fichier, par exemple :
+
+sentinelone_manager.sh
+
+Rendez-le exécutable :
 
 bash
 Copier
 Modifier
 chmod +x sentinelone_manager.sh
-Lancer le script
+Exécutez le script :
 
 bash
 Copier
 Modifier
 ./sentinelone_manager.sh
-Utilisation
+📋 Utilisation
 Au lancement, le script affiche un menu interactif :
 
 rust
@@ -52,43 +57,24 @@ Que souhaitez-vous faire ?
 4 - Vérifier la version de l'agent
 5 - Quitter
 Choix [1-5] :
-Option 1 : Installer un agent SentinelOne
-Le script demande le chemin vers le fichier RPM.
-Exemple : /home/user/agent_sentinelone.rpm
-Il vérifie la présence du fichier puis lance l’installation via rpm -i.
+Détail des options
+Option	Fonctionnalité
+1	Installer un agent à partir d’un fichier RPM
+2	Ajouter un token d’enregistrement
+3	Afficher le statut actuel de l’agent SentinelOne
+4	Afficher la version installée de l’agent
+5	Quitter le gestionnaire
 
-Option 2 : Ajouter un token de gestion
-Permet d’entrer un token d’enregistrement pour associer l’agent à la console SentinelOne.
-Le token ne doit pas être vide, sinon une erreur est affichée.
-
-Option 3 : Vérifier le statut de l’agent
-Affiche l’état actuel de l’agent SentinelOne via la commande sentinelctl control status.
-
-Option 4 : Vérifier la version de l’agent
-Affiche la version installée de l’agent.
-
-Option 5 : Quitter
-Sort du script proprement.
-
-Fonctionnalités supplémentaires
-Gestion des erreurs : si une commande échoue, un message d’erreur est affiché et le script s’arrête.
-
-Couleurs dans la console pour une meilleure lisibilité (vert pour info, rouge pour erreur, etc.).
-
-Bannière ASCII pour un affichage agréable en début de session.
-
-Pause après chaque action pour laisser le temps de lire les résultats avant de revenir au menu.
-
-Personnalisation
-Si le chemin vers sentinelctl est différent sur ta machine, modifie la variable S1CTL en début de script :
+🎨 Personnalisation
+Si l’emplacement de sentinelctl est différent, modifiez la variable S1CTL au début du script :
 
 bash
 Copier
 Modifier
 S1CTL="/chemin/vers/sentinelctl"
-Tu peux ajouter d’autres fonctionnalités dans le menu principal en créant de nouvelles fonctions et en modifiant la gestion des choix.
+Vous pouvez facilement étendre les fonctionnalités en ajoutant de nouvelles fonctions et options au menu.
 
-Exemple d’usage
+🔎 Exemple d’utilisation
 bash
 Copier
 Modifier
@@ -112,3 +98,12 @@ Chemin vers le fichier RPM (.rpm) : /home/romain/agent.rpm
 [INFO] Agent installé avec succès.
 
 Appuyez sur Entrée pour revenir au menu principal...
+⚠️ Gestion des erreurs
+Le script vérifie la réussite de chaque commande importante.
+
+En cas d’erreur (fichier manquant, token vide, échec d’installation), un message d’erreur s’affiche en rouge et le script s’arrête proprement.
+
+📄 Licence
+Ce script est libre d’utilisation, modification et distribution.
+N’hésitez pas à l’adapter à vos besoins !
+
