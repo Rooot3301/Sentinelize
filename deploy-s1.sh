@@ -12,8 +12,8 @@ set -o pipefail
 ############################################
 
 S1CTL_DEFAULT="/opt/sentinelone/bin/sentinelctl"
-SERVICE_NAME_DEFAULT="sentinelone"          # ⚠️ À ADAPTER au vrai nom du service
-AGENT_PACKAGE_DEFAULT="sentinelone-agent"   # ⚠️ À ADAPTER au vrai nom du paquet RPM
+SERVICE_NAME_DEFAULT="sentinelone"          # À ADAPTER au vrai nom du service
+AGENT_PACKAGE_DEFAULT="sentinelone-agent"   # À ADAPTER au vrai nom du paquet RPM
 LOG_FILE_DEFAULT="/var/log/s1-manager.log"
 LOG_LEVEL_DEFAULT="INFO"                    # ERROR | WARN | INFO | DEBUG
 

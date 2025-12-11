@@ -1,115 +1,166 @@
-# 🛡️ SentinelOne Agent Manager v2.0
+# SentinelOne Agent Manager v2.0
+
+Script Bash avancé pour la gestion complète de l'agent SentinelOne sur Linux avec une interface organisée en sous-menus.
 
 ---
 
-## 🚀 Présentation
+## Table des matières
 
-Bienvenue dans **SentinelOne Agent Manager v2.0** !
-Un script Bash avancé, interactif et complet pour gérer l'agent SentinelOne sur Linux avec une interface organisée en sous-menus.
-
-Ce script permet de :
-
-### 📦 Installation & Configuration
-- ✅ Installer l'agent depuis un fichier RPM local ou une URL
-- ✅ Configurer le token de management
-- ✅ Mettre à jour l'agent
-- ✅ Désinstaller l'agent
-
-### 🎯 Contrôle de l'agent
-- ✅ Démarrer/Arrêter l'agent
-- ✅ Vérifier le statut et la version
-- ✅ Détection de l'agent
-
-### 🛡️ Opérations de sécurité
-- ✅ Lancer, arrêter et surveiller des scans
-- ✅ Consulter le statut des policies
-- ✅ Gérer les fichiers en quarantaine
-- ✅ Opérations firewall
-
-### 📊 Monitoring & Diagnostic
-- ✅ Health check complet
-- ✅ Consultation des logs (agent, script, systemd)
-- ✅ Statut détaillé du service
-
-### ⚙️ Configuration avancée
-- ✅ Gestion des assets
-- ✅ Opérations sur les engines
-
-### 🔧 Gestion du service systemd
-- ✅ Contrôle complet du service (start, stop, restart, status)
-
-> **Auteur** : Root3301
-> **Version** : 2.0
-> **Date** : Décembre 2025
+- [Présentation](#présentation)
+- [Prérequis](#prérequis)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Utilisation](#utilisation)
+  - [Mode Interactif](#mode-interactif)
+  - [Mode CLI](#mode-cli)
+- [Fonctionnalités](#fonctionnalités)
+- [Exemples](#exemples)
+- [Logs](#logs)
+- [Sécurité](#sécurité)
+- [Licence](#licence)
 
 ---
 
-## 🛠️ Prérequis
+## Présentation
 
-- ✅ Distribution Linux avec accès `sudo`
-- ✅ Bash shell
-- ✅ `curl` pour le téléchargement depuis URL
-- ✅ Chemin de l'outil `sentinelctl` par défaut : `/opt/sentinelone/bin/sentinelctl`
-- ✅ (Optionnel) Fichier RPM de l'agent SentinelOne ou URL de téléchargement
-- ✅ (Optionnel) Token de gestion SentinelOne
+SentinelOne Agent Manager v2.0 est un outil de gestion complet pour l'agent SentinelOne sur Linux. Il offre une interface interactive organisée en menus et sous-menus, ainsi qu'un mode CLI pour l'automatisation.
+
+### Fonctionnalités principales
+
+#### Installation & Configuration
+- Installer l'agent depuis un fichier RPM local ou une URL
+- Configurer le token de management
+- Mettre à jour l'agent
+- Désinstaller l'agent
+
+#### Contrôle de l'agent
+- Démarrer/Arrêter l'agent
+- Vérifier le statut et la version
+- Détection de l'agent
+
+#### Opérations de sécurité
+- Lancer, arrêter et surveiller des scans
+- Consulter le statut des policies
+- Gérer les fichiers en quarantaine
+- Opérations firewall
+
+#### Monitoring & Diagnostic
+- Health check complet
+- Consultation des logs (agent, script, systemd)
+- Statut détaillé du service
+
+#### Configuration avancée
+- Gestion des assets
+- Opérations sur les engines
+
+#### Gestion du service systemd
+- Contrôle complet du service (start, stop, restart, status)
 
 ---
 
-## 📥 Installation & Lancement
+## Prérequis
+
+- Distribution Linux avec accès `sudo`
+- Bash shell
+- `curl` pour le téléchargement depuis URL
+- Agent SentinelOne installable (fichier RPM ou URL)
+- Token de gestion SentinelOne (pour l'enregistrement)
+
+---
+
+## Installation
 
 ```bash
-# 1. Télécharger ou copier le script
-wget https://example.com/deploy-s1.sh
+# 1. Télécharger le script
+wget https://votre-repo.com/deploy-s1.sh
 # ou
-curl -O https://example.com/deploy-s1.sh
+curl -O https://votre-repo.com/deploy-s1.sh
 
 # 2. Rendre le script exécutable
 chmod +x deploy-s1.sh
 
-# 3. Lancer le script en mode interactif
-./deploy-s1.sh
-
-# Ou en mode CLI (non-interactif)
-./deploy-s1.sh --help
+# 3. (Optionnel) Créer un fichier de configuration
+cp .env.example .env
+nano .env
 ```
 
 ---
 
-## 📋 Mode Interactif
+## Configuration
 
-Au lancement, le script affiche un menu principal organisé par catégories :
+Le script utilise un fichier `.env` optionnel pour la configuration. Créez ce fichier à partir de l'exemple fourni :
+
+```bash
+cp .env.example .env
+```
+
+### Variables configurables
+
+```bash
+# Chemin vers l'exécutable sentinelctl
+S1CTL="/opt/sentinelone/bin/sentinelctl"
+
+# Nom du service systemd
+SERVICE_NAME="sentinelone"
+
+# Nom du paquet RPM de l'agent
+AGENT_PACKAGE="sentinelone-agent"
+
+# Fichier de log du script
+LOG_FILE="/var/log/s1-manager.log"
+
+# Niveau de log (ERROR | WARN | INFO | DEBUG)
+LOG_LEVEL="INFO"
+```
+
+**Note** : Si le fichier `.env` n'existe pas, le script utilisera les valeurs par défaut.
+
+---
+
+## Utilisation
+
+### Mode Interactif
+
+Lancez le script sans arguments pour accéder au menu interactif :
+
+```bash
+./deploy-s1.sh
+```
+
+Le menu principal affiche les catégories suivantes :
 
 ```
 ╔═════════════════════════════════════════════════════════╗
 ║  MENU PRINCIPAL                                         ║
 ╠═════════════════════════════════════════════════════════╣
-║  [1] 📦 Installation & Configuration                    ║
-║  [2] 🎯 Contrôle de l'agent                             ║
-║  [3] 🛡️  Opérations de sécurité                         ║
-║  [4] 📊 Monitoring & Diagnostic                         ║
-║  [5] ⚙️  Configuration avancée                          ║
-║  [6] 🔧 Gestion du service systemd                      ║
+║  [1] Installation & Configuration                       ║
+║  [2] Contrôle de l'agent                                ║
+║  [3] Opérations de sécurité                             ║
+║  [4] Monitoring & Diagnostic                            ║
+║  [5] Configuration avancée                              ║
+║  [6] Gestion du service systemd                         ║
 ╠═════════════════════════════════════════════════════════╣
-║  [0] 🚪 Quitter                                         ║
+║  [0] Quitter                                            ║
 ╚═════════════════════════════════════════════════════════╝
 ```
 
 Chaque option mène à un sous-menu détaillé avec les opérations spécifiques.
 
----
+### Mode CLI
 
-## 🖥️ Mode CLI (Non-interactif)
-
-Le script peut également être utilisé en ligne de commande pour l'automatisation :
+Le script supporte également un mode ligne de commande pour l'automatisation :
 
 ```bash
+# Afficher l'aide
+./deploy-s1.sh --help
+
 # Installer l'agent depuis un fichier local
 sudo ./deploy-s1.sh --install-rpm /path/to/agent.rpm
 
 # Installer l'agent depuis une URL
 sudo ./deploy-s1.sh --install-rpm https://example.com/agent.rpm
 
-# Configurer le token
+# Configurer le token de management
 sudo ./deploy-s1.sh --set-token "YOUR_TOKEN_HERE"
 
 # Vérifier le statut
@@ -118,158 +169,286 @@ sudo ./deploy-s1.sh --set-token "YOUR_TOKEN_HERE"
 # Health check complet
 ./deploy-s1.sh --health-check
 
-# Afficher la version
+# Afficher la version de l'agent
 ./deploy-s1.sh --version
-
-# Afficher l'aide
-./deploy-s1.sh --help
 ```
 
 ---
 
-## 🧰 Détail des fonctionnalités
+## Fonctionnalités
 
-### 📦 Installation & Configuration
-- Installer depuis un fichier RPM local ou une URL
-- Configurer le token de management
-- Mettre à jour l'agent (via sentinelctl control upgrade)
-- Désinstaller l'agent
+### 1. Installation & Configuration
 
-### 🎯 Contrôle de l'agent
-- Démarrer/Arrêter l'agent via sentinelctl
-- Vérifier le statut détaillé
-- Afficher la version installée
-- Détection de l'agent
+**Installer l'agent**
+- Depuis un fichier RPM local
+- Depuis une URL (téléchargement automatique avec curl)
 
-### 🛡️ Opérations de sécurité
-- **Scans** : Démarrer, arrêter, vérifier le statut
-- **Policies** : Consulter le statut des policies
-- **Quarantine** : Lister les fichiers en quarantaine (tous ou par groupe)
-- **Firewall** : Opérations de contrôle du firewall
+**Configurer le token**
+- Configuration du token de management pour l'enregistrement auprès de la console SentinelOne
 
-### 📊 Monitoring & Diagnostic
-- Health check complet (système, service, agent)
-- Consultation des logs de l'agent
-- Logs du script et systemd
-- Vue d'ensemble du statut
+**Mettre à jour l'agent**
+- Utilise `sentinelctl control upgrade`
 
-### ⚙️ Configuration avancée
-- Gestion des assets
-- Opérations sur les engines
+**Désinstaller l'agent**
+- Désinstallation complète avec confirmation
 
-### 🔧 Gestion du service systemd
-- Statut du service
-- Démarrer/Arrêter/Redémarrer le service
+### 2. Contrôle de l'agent
+
+- `sentinelctl control start` - Démarrer l'agent
+- `sentinelctl control stop` - Arrêter l'agent
+- `sentinelctl control status` - Statut de l'agent
+- `sentinelctl version` - Version de l'agent
+- `sentinelctl detector` - Détection de l'agent
+
+### 3. Opérations de sécurité
+
+**Scans**
+- `sentinelctl scan start` - Démarrer un scan
+- `sentinelctl scan abort` - Arrêter le scan en cours
+- `sentinelctl scan status` - Statut du scan
+
+**Policies**
+- `sentinelctl policy status` - Statut des policies
+
+**Quarantaine**
+- `sentinelctl quarantine list all` - Liste tous les fichiers en quarantaine
+- `sentinelctl quarantine list <group>` - Liste par groupe
+
+**Firewall**
+- `sentinelctl fw` - Opérations firewall
+
+### 4. Monitoring & Diagnostic
+
+**Health Check**
+- Vérification du binaire sentinelctl
+- État du service systemd
+- Statut de l'agent
+- Version de l'agent
+- Logs récents
+
+**Logs**
+- Logs du script (s1-manager.log)
+- Logs de l'agent (via sentinelctl log)
+- Logs systemd (journalctl)
+
+### 5. Configuration avancée
+
+- `sentinelctl asset` - Gestion des assets
+- `sentinelctl engines` - Opérations sur les engines
+
+### 6. Gestion du service systemd
+
+- `systemctl status sentinelone` - Statut du service
+- `systemctl start sentinelone` - Démarrer le service
+- `systemctl stop sentinelone` - Arrêter le service
+- `systemctl restart sentinelone` - Redémarrer le service
 
 ---
 
-## 🎨 Personnalisation
+## Exemples
 
-### Variables d'environnement
-Créer un fichier `.env` à côté du script pour personnaliser les paramètres :
+### Installation complète depuis une URL
 
 ```bash
-# Chemin vers sentinelctl
-S1CTL="/opt/sentinelone/bin/sentinelctl"
+# Lancer le script
+sudo ./deploy-s1.sh
 
-# Nom du service systemd
-SERVICE_NAME="sentinelone"
+# Sélectionner [1] Installation & Configuration
+# Sélectionner [1] Installer l'agent SentinelOne (RPM)
+# Sélectionner [2] URL de téléchargement
+# Entrer l'URL : https://example.com/sentinelone-agent.rpm
 
-# Nom du paquet RPM
-AGENT_PACKAGE="sentinelone-agent"
-
-# Fichier de log
-LOG_FILE="/var/log/s1-manager.log"
-
-# Niveau de log (ERROR | WARN | INFO | DEBUG)
-LOG_LEVEL="INFO"
-```
-
-### Logs
-Le script génère automatiquement des logs dans `/var/log/s1-manager.log` avec :
-- Rotation automatique des logs (> 1 Mo)
-- Niveaux de log configurables
-- Horodatage des événements
-
----
-
-## 🧪 Exemple d'utilisation
-
-### Installation depuis une URL
-```bash
-$ sudo ./deploy-s1.sh
-
-# Menu principal → [1] Installation & Configuration
-# Sous-menu → [1] Installer l'agent SentinelOne (RPM)
-# Choix → [2] URL de téléchargement
-# URL → https://example.com/sentinelone-agent.rpm
-
-✓ Fichier téléchargé
-✓ Agent installé avec succès
+# Retour au menu principal
+# Sélectionner [1] Installation & Configuration
+# Sélectionner [2] Configurer le token de management
+# Entrer le token d'enregistrement
 ```
 
 ### Lancer un scan de sécurité
+
 ```bash
-$ sudo ./deploy-s1.sh
+sudo ./deploy-s1.sh
 
-# Menu principal → [3] Opérations de sécurité
-# Sous-menu → [1] Démarrer un scan
-
-✓ Scan démarré avec succès
+# Sélectionner [3] Opérations de sécurité
+# Sélectionner [1] Démarrer un scan
 ```
 
 ### Health check complet
-```bash
-$ sudo ./deploy-s1.sh --health-check
 
+```bash
+sudo ./deploy-s1.sh --health-check
+```
+
+Sortie exemple :
+```
 ➤ Vérifications système
-   ✓ sentinelctl : DISPONIBLE
+   [OK] sentinelctl : DISPONIBLE (/opt/sentinelone/bin/sentinelctl)
+
 ➤ État du service systemd
-   ✓ Activation auto-démarrage : ACTIVÉ
-   ✓ État actuel : EN COURS D'EXÉCUTION
-➤ Statut de l'agent
-   [détails du statut...]
-✓ Health Check global : TOUS LES TESTS RÉUSSIS
+   [OK] Activation auto-démarrage : ACTIVÉ
+   [OK] État actuel : EN COURS D'EXÉCUTION
+
+➤ Statut de l'agent (sentinelctl)
+─────────────────────────────────────────────────────
+[détails du statut...]
+
+➤ Version de l'agent
+─────────────────────────────────────────────────────
+Agent version: 23.x.x.xxx
+
+[OK] Health Check global : TOUS LES TESTS RÉUSSIS
+```
+
+### Automatisation avec le mode CLI
+
+```bash
+#!/bin/bash
+
+# Script d'installation automatique
+AGENT_URL="https://example.com/sentinelone-agent.rpm"
+TOKEN="votre-token-ici"
+
+# Installation
+sudo ./deploy-s1.sh --install-rpm "$AGENT_URL"
+
+# Configuration du token
+sudo ./deploy-s1.sh --set-token "$TOKEN"
+
+# Vérification
+./deploy-s1.sh --health-check
 ```
 
 ---
 
-## ⚠️ Gestion des erreurs
+## Logs
 
-- 🔒 Chaque action critique est vérifiée automatiquement
-- 📝 Tous les événements sont journalisés
-- ❌ Messages d'erreur clairs et colorés
-- 🔄 Nettoyage automatique des fichiers temporaires
-- ✅ Validation des paramètres avant exécution
+### Logs du script
+
+Le script génère des logs dans `/var/log/s1-manager.log` (configurable via `.env`).
+
+**Caractéristiques** :
+- Rotation automatique des logs (> 1 Mo)
+- Niveaux de log : ERROR, WARN, INFO, DEBUG
+- Horodatage de chaque événement
+- Format : `[YYYY-MM-DD HH:MM:SS] [LEVEL] message`
+
+**Consulter les logs** :
+```bash
+# 50 dernières lignes
+tail -n 50 /var/log/s1-manager.log
+
+# Suivi en temps réel
+tail -f /var/log/s1-manager.log
+
+# Via le menu interactif
+./deploy-s1.sh
+# [4] Monitoring & Diagnostic > [3] Logs du script & systemd
+```
+
+### Logs de l'agent
+
+Consultez les logs de l'agent via :
+- Menu interactif : [4] Monitoring & Diagnostic > [2] Logs de l'agent
+- Commande directe : `sudo sentinelctl log`
+
+### Logs systemd
+
+```bash
+# Logs du service
+journalctl -u sentinelone -n 50
+
+# Suivi en temps réel
+journalctl -u sentinelone -f
+```
 
 ---
 
-## 🔐 Sécurité
+## Sécurité
 
-- Privilèges sudo requis pour les opérations critiques
-- Validation des fichiers avant installation
-- Nettoyage des fichiers temporaires après téléchargement
-- Logs sécurisés des opérations
+### Bonnes pratiques
+
+1. **Privilèges sudo**
+   - Le script nécessite des privilèges sudo pour les opérations critiques
+   - Vérifiez toujours la source du script avant exécution
+
+2. **Validation des fichiers**
+   - Le script vérifie l'existence des fichiers RPM avant installation
+   - Validation des URLs avant téléchargement
+
+3. **Nettoyage automatique**
+   - Les fichiers temporaires sont supprimés après téléchargement
+   - Pas de données sensibles stockées dans les logs
+
+4. **Gestion des tokens**
+   - Les tokens ne sont jamais loggés
+   - Utilisez des variables d'environnement pour les scripts automatisés
+
+### Recommandations
+
+- Conservez le fichier `.env` avec des permissions restrictives :
+  ```bash
+  chmod 600 .env
+  ```
+
+- Utilisez un utilisateur de service dédié pour les déploiements automatisés
+
+- Auditez régulièrement les logs pour détecter les anomalies
 
 ---
 
-## 📄 Licence
+## Gestion des erreurs
+
+Le script implémente une gestion complète des erreurs :
+
+- **Codes de retour** : Chaque fonction retourne un code de retour approprié
+- **Messages clairs** : Messages d'erreur colorés et explicites
+- **Validation des paramètres** : Vérification avant exécution
+- **Logs détaillés** : Tous les événements sont journalisés
+
+Format des messages :
+- `[OK]` - Opération réussie (vert)
+- `[WARN]` - Avertissement (jaune)
+- `[ERREUR]` - Erreur (rouge)
+- `[DEBUG]` - Information de debug (magenta)
+
+---
+
+## Licence
 
 Ce script est proposé à titre éducatif et professionnel.
-Libre de modification et distribution avec attribution de l'auteur original.
+
+**Conditions** :
+- Libre de modification et distribution
+- Attribution de l'auteur original requise
+- Aucune garantie fournie
 
 ---
 
-## 🤝 Contribution
+## Contribution
 
-Les contributions sont les bienvenues ! N'hésite pas à :
-- Signaler des bugs
+Les contributions sont les bienvenues !
+
+**Comment contribuer** :
+- Signaler des bugs via les issues
 - Proposer des améliorations
-- Ajouter de nouvelles fonctionnalités
+- Soumettre des pull requests
+
+**Guidelines** :
+- Respecter le style de code existant
+- Documenter les nouvelles fonctionnalités
+- Tester avant de soumettre
 
 ---
 
-**Développé avec ❤️ par Root3301**
+## Support
 
+**Documentation officielle SentinelOne** :
+- [Documentation sentinelctl](https://docs.sentinelone.com/)
 
+**Auteur** : Root3301
+**Version** : 2.0
+**Date** : Décembre 2025
 
+---
+
+**Développé par Root3301**
