@@ -451,6 +451,217 @@ health_check() {
 }
 
 ############################################
+#      NOUVELLES FONCTIONS SENTINELCTL     #
+############################################
+
+# Scan operations
+scan_start() {
+  echo
+  echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  🔍 ${BOLD}Démarrage d'un scan${RESET}                          ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
+  echo
+  check_s1ctl || return 1
+  log_message "INFO" "Démarrage d'un scan de disque"
+  sudo "$S1CTL" scan start
+  local rc=$?
+  check_success_or_log "$rc" "Échec du démarrage du scan" "Scan démarré avec succès"
+}
+
+scan_abort() {
+  echo
+  echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  ⏹️  ${BOLD}Arrêt du scan en cours${RESET}                       ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
+  echo
+  check_s1ctl || return 1
+  log_message "INFO" "Arrêt du scan en cours"
+  sudo "$S1CTL" scan abort
+  local rc=$?
+  check_success_or_log "$rc" "Échec de l'arrêt du scan" "Scan arrêté avec succès"
+}
+
+scan_status() {
+  echo
+  echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  📊 ${BOLD}Statut du scan${RESET}                               ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
+  echo
+  check_s1ctl || return 1
+  sudo "$S1CTL" scan status
+  local rc=$?
+  log_message "INFO" "Consultation du statut du scan (rc=$rc)"
+  echo
+  return $rc
+}
+
+# Policy operations
+policy_status() {
+  echo
+  echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  📋 ${BOLD}Statut des policies${RESET}                          ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
+  echo
+  check_s1ctl || return 1
+  sudo "$S1CTL" policy status
+  local rc=$?
+  log_message "INFO" "Consultation du statut des policies (rc=$rc)"
+  echo
+  return $rc
+}
+
+# Quarantine operations
+quarantine_list() {
+  echo
+  echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  🔒 ${BOLD}Liste des fichiers en quarantaine${RESET}           ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
+  echo
+  check_s1ctl || return 1
+
+  echo -e "${BOLD}Options disponibles :${RESET}"
+  echo -e "  ${GREEN}[1]${RESET} Tous les fichiers"
+  echo -e "  ${GREEN}[2]${RESET} Par groupe"
+  echo
+  read -rp "Votre choix [1-2] : " QUAR_CHOICE
+
+  case "$QUAR_CHOICE" in
+    1)
+      log_message "INFO" "Liste de tous les fichiers en quarantaine"
+      sudo "$S1CTL" quarantine list all
+      ;;
+    2)
+      read -rp "Nom du groupe : " GROUP_NAME
+      log_message "INFO" "Liste des fichiers en quarantaine pour le groupe : $GROUP_NAME"
+      sudo "$S1CTL" quarantine list "$GROUP_NAME"
+      ;;
+    *)
+      log_message "ERROR" "Choix invalide"
+      return 1
+      ;;
+  esac
+
+  local rc=$?
+  echo
+  return $rc
+}
+
+# Agent control operations
+agent_start() {
+  echo
+  echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  ▶️  ${BOLD}Démarrage de l'agent${RESET}                         ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
+  echo
+  check_s1ctl || return 1
+  log_message "INFO" "Démarrage de l'agent SentinelOne"
+  sudo "$S1CTL" control start
+  local rc=$?
+  check_success_or_log "$rc" "Échec du démarrage de l'agent" "Agent démarré avec succès"
+}
+
+agent_stop() {
+  echo
+  echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  ⏹️  ${BOLD}Arrêt de l'agent${RESET}                             ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
+  echo
+  check_s1ctl || return 1
+  log_message "INFO" "Arrêt de l'agent SentinelOne"
+  sudo "$S1CTL" control stop
+  local rc=$?
+  check_success_or_log "$rc" "Échec de l'arrêt de l'agent" "Agent arrêté avec succès"
+}
+
+agent_upgrade() {
+  echo
+  echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  🔄 ${BOLD}Mise à jour de l'agent${RESET}                       ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
+  echo
+  check_s1ctl || return 1
+  log_message "INFO" "Mise à jour de l'agent SentinelOne"
+  sudo "$S1CTL" control upgrade
+  local rc=$?
+  check_success_or_log "$rc" "Échec de la mise à jour de l'agent" "Agent mis à jour avec succès"
+}
+
+# Log operations
+show_agent_log() {
+  echo
+  echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  📄 ${BOLD}Logs de l'agent${RESET}                              ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
+  echo
+  check_s1ctl || return 1
+  sudo "$S1CTL" log
+  local rc=$?
+  log_message "INFO" "Consultation des logs de l'agent (rc=$rc)"
+  echo
+  return $rc
+}
+
+# Asset management
+asset_management() {
+  echo
+  echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  💼 ${BOLD}Gestion des assets${RESET}                           ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
+  echo
+  check_s1ctl || return 1
+  sudo "$S1CTL" asset
+  local rc=$?
+  log_message "INFO" "Gestion des assets (rc=$rc)"
+  echo
+  return $rc
+}
+
+# Engines operations
+engines_operations() {
+  echo
+  echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  ⚙️  ${BOLD}Opérations sur les engines${RESET}                   ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
+  echo
+  check_s1ctl || return 1
+  sudo "$S1CTL" engines
+  local rc=$?
+  log_message "INFO" "Opérations sur les engines (rc=$rc)"
+  echo
+  return $rc
+}
+
+# Firewall operations
+firewall_operations() {
+  echo
+  echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  🔥 ${BOLD}Opérations firewall${RESET}                          ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
+  echo
+  check_s1ctl || return 1
+  sudo "$S1CTL" fw
+  local rc=$?
+  log_message "INFO" "Opérations firewall (rc=$rc)"
+  echo
+  return $rc
+}
+
+# Management operations
+management_detector() {
+  echo
+  echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  🔎 ${BOLD}Détection de l'agent${RESET}                         ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
+  echo
+  check_s1ctl || return 1
+  sudo "$S1CTL" detector
+  local rc=$?
+  log_message "INFO" "Détection de l'agent (rc=$rc)"
+  echo
+  return $rc
+}
+
+############################################
 #          MODE CLI (NON-INTERACTIF)       #
 ############################################
 
@@ -570,33 +781,209 @@ handle_cli() {
 ############################################
 
 afficher_menu() {
-  echo -e "${BOLD}${BLUE}╔═══════════════════════════════════════════════════════════════════╗${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${CYAN}${BOLD}MENU PRINCIPAL${RESET}                                                  ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}╠═══════════════════════════════════════════════════════════════════╣${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${BOLD}Installation & Configuration${RESET}                                  ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}    ${GREEN}[1]${RESET} 📦 Installer un agent SentinelOne (RPM)                 ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}    ${GREEN}[2]${RESET} 🔑 Ajouter/modifier le token de gestion                 ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}╠═══════════════════════════════════════════════════════════════════╣${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${BOLD}Gestion du Service${RESET}                                            ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}    ${GREEN}[3]${RESET} 📊 Statut du service ${DIM}($SERVICE_NAME)${RESET}                     ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}    ${GREEN}[4]${RESET} ▶️  Démarrer le service                                  ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}    ${GREEN}[5]${RESET} ⏹️  Arrêter le service                                   ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}    ${GREEN}[6]${RESET} 🔄 Redémarrer le service                                ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}╠═══════════════════════════════════════════════════════════════════╣${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${BOLD}Monitoring & Diagnostic${RESET}                                       ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}    ${GREEN}[7]${RESET} 🛡️  Statut de l'agent (sentinelctl)                     ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}    ${GREEN}[8]${RESET} ℹ️  Version de l'agent                                  ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}    ${GREEN}[10]${RESET} 📋 Afficher les logs (script + systemd)               ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}    ${GREEN}[11]${RESET} 🏥 Health Check complet                               ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}╠═══════════════════════════════════════════════════════════════════╣${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${BOLD}Maintenance${RESET}                                                   ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}    ${RED}[9]${RESET} 🗑️  Désinstaller l'agent                                 ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}╠═══════════════════════════════════════════════════════════════════╣${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}    ${YELLOW}[12]${RESET} 🚪 Quitter                                            ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}╚═══════════════════════════════════════════════════════════════════╝${RESET}"
+  echo -e "${BOLD}${BLUE}╔═════════════════════════════════════════════════════════╗${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${CYAN}${BOLD}MENU PRINCIPAL${RESET}                                        ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}╠═════════════════════════════════════════════════════════╣${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[1]${RESET} 📦 Installation & Configuration                 ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[2]${RESET} 🎯 Contrôle de l'agent                          ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[3]${RESET} 🛡️  Opérations de sécurité                      ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[4]${RESET} 📊 Monitoring & Diagnostic                      ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[5]${RESET} ⚙️  Configuration avancée                       ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[6]${RESET} 🔧 Gestion du service systemd                   ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}╠═════════════════════════════════════════════════════════╣${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${YELLOW}[0]${RESET} 🚪 Quitter                                      ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}╚═════════════════════════════════════════════════════════╝${RESET}"
   echo
-  echo -e -n "${CYAN}${BOLD}➜${RESET} Votre choix ${DIM}[1-12]${RESET} : "
+  echo -e -n "${CYAN}${BOLD}➜${RESET} Votre choix ${DIM}[0-6]${RESET} : "
   read -r CHOIX
+}
+
+menu_installation() {
+  clear
+  banner
+  echo -e "${BOLD}${BLUE}╔═════════════════════════════════════════════════════════╗${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${CYAN}${BOLD}INSTALLATION & CONFIGURATION${RESET}                         ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}╠═════════════════════════════════════════════════════════╣${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[1]${RESET} 📦 Installer l'agent SentinelOne (RPM)         ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[2]${RESET} 🔑 Configurer le token de management           ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[3]${RESET} 🔄 Mettre à jour l'agent                        ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${RED}[4]${RESET} 🗑️  Désinstaller l'agent                         ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}╠═════════════════════════════════════════════════════════╣${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${YELLOW}[0]${RESET} ↩️  Retour au menu principal                    ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}╚═════════════════════════════════════════════════════════╝${RESET}"
+  echo
+  echo -e -n "${CYAN}${BOLD}➜${RESET} Votre choix ${DIM}[0-4]${RESET} : "
+  read -r SUBCHOIX
+
+  case "$SUBCHOIX" in
+    1) installer_agent_rpm ;;
+    2) ajouter_token ;;
+    3) agent_upgrade ;;
+    4) desinstaller_agent ;;
+    0) return ;;
+    *) log_message "WARN" "Choix invalide : $SUBCHOIX" ;;
+  esac
+
+  echo
+  echo -e "${CYAN}Appuyez sur ${BOLD}Entrée${RESET}${CYAN} pour continuer...${RESET}"
+  read -r
+}
+
+menu_controle_agent() {
+  clear
+  banner
+  echo -e "${BOLD}${BLUE}╔═════════════════════════════════════════════════════════╗${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${CYAN}${BOLD}CONTRÔLE DE L'AGENT${RESET}                                  ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}╠═════════════════════════════════════════════════════════╣${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[1]${RESET} ▶️  Démarrer l'agent                             ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[2]${RESET} ⏹️  Arrêter l'agent                              ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[3]${RESET} 📊 Statut de l'agent                            ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[4]${RESET} ℹ️  Version de l'agent                          ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[5]${RESET} 🔎 Détection de l'agent                         ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}╠═════════════════════════════════════════════════════════╣${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${YELLOW}[0]${RESET} ↩️  Retour au menu principal                    ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}╚═════════════════════════════════════════════════════════╝${RESET}"
+  echo
+  echo -e -n "${CYAN}${BOLD}➜${RESET} Votre choix ${DIM}[0-5]${RESET} : "
+  read -r SUBCHOIX
+
+  case "$SUBCHOIX" in
+    1) agent_start ;;
+    2) agent_stop ;;
+    3) verifier_status_agent ;;
+    4) verifier_version_agent ;;
+    5) management_detector ;;
+    0) return ;;
+    *) log_message "WARN" "Choix invalide : $SUBCHOIX" ;;
+  esac
+
+  echo
+  echo -e "${CYAN}Appuyez sur ${BOLD}Entrée${RESET}${CYAN} pour continuer...${RESET}"
+  read -r
+}
+
+menu_securite() {
+  clear
+  banner
+  echo -e "${BOLD}${BLUE}╔═════════════════════════════════════════════════════════╗${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${CYAN}${BOLD}OPÉRATIONS DE SÉCURITÉ${RESET}                               ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}╠═════════════════════════════════════════════════════════╣${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[1]${RESET} 🔍 Démarrer un scan                             ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[2]${RESET} ⏹️  Arrêter le scan en cours                     ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[3]${RESET} 📊 Statut du scan                               ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[4]${RESET} 📋 Statut des policies                          ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[5]${RESET} 🔒 Fichiers en quarantaine                      ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[6]${RESET} 🔥 Opérations firewall                          ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}╠═════════════════════════════════════════════════════════╣${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${YELLOW}[0]${RESET} ↩️  Retour au menu principal                    ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}╚═════════════════════════════════════════════════════════╝${RESET}"
+  echo
+  echo -e -n "${CYAN}${BOLD}➜${RESET} Votre choix ${DIM}[0-6]${RESET} : "
+  read -r SUBCHOIX
+
+  case "$SUBCHOIX" in
+    1) scan_start ;;
+    2) scan_abort ;;
+    3) scan_status ;;
+    4) policy_status ;;
+    5) quarantine_list ;;
+    6) firewall_operations ;;
+    0) return ;;
+    *) log_message "WARN" "Choix invalide : $SUBCHOIX" ;;
+  esac
+
+  echo
+  echo -e "${CYAN}Appuyez sur ${BOLD}Entrée${RESET}${CYAN} pour continuer...${RESET}"
+  read -r
+}
+
+menu_monitoring() {
+  clear
+  banner
+  echo -e "${BOLD}${BLUE}╔═════════════════════════════════════════════════════════╗${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${CYAN}${BOLD}MONITORING & DIAGNOSTIC${RESET}                              ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}╠═════════════════════════════════════════════════════════╣${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[1]${RESET} 🏥 Health Check complet                         ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[2]${RESET} 📄 Logs de l'agent                              ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[3]${RESET} 📋 Logs du script & systemd                     ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[4]${RESET} 📊 Statut complet (service + agent)            ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}╠═════════════════════════════════════════════════════════╣${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${YELLOW}[0]${RESET} ↩️  Retour au menu principal                    ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}╚═════════════════════════════════════════════════════════╝${RESET}"
+  echo
+  echo -e -n "${CYAN}${BOLD}➜${RESET} Votre choix ${DIM}[0-4]${RESET} : "
+  read -r SUBCHOIX
+
+  case "$SUBCHOIX" in
+    1) health_check ;;
+    2) show_agent_log ;;
+    3) afficher_logs ;;
+    4) service_status && verifier_status_agent ;;
+    0) return ;;
+    *) log_message "WARN" "Choix invalide : $SUBCHOIX" ;;
+  esac
+
+  echo
+  echo -e "${CYAN}Appuyez sur ${BOLD}Entrée${RESET}${CYAN} pour continuer...${RESET}"
+  read -r
+}
+
+menu_avance() {
+  clear
+  banner
+  echo -e "${BOLD}${BLUE}╔═════════════════════════════════════════════════════════╗${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${CYAN}${BOLD}CONFIGURATION AVANCÉE${RESET}                                ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}╠═════════════════════════════════════════════════════════╣${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[1]${RESET} 💼 Gestion des assets                           ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[2]${RESET} ⚙️  Opérations sur les engines                  ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}╠═════════════════════════════════════════════════════════╣${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${YELLOW}[0]${RESET} ↩️  Retour au menu principal                    ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}╚═════════════════════════════════════════════════════════╝${RESET}"
+  echo
+  echo -e -n "${CYAN}${BOLD}➜${RESET} Votre choix ${DIM}[0-2]${RESET} : "
+  read -r SUBCHOIX
+
+  case "$SUBCHOIX" in
+    1) asset_management ;;
+    2) engines_operations ;;
+    0) return ;;
+    *) log_message "WARN" "Choix invalide : $SUBCHOIX" ;;
+  esac
+
+  echo
+  echo -e "${CYAN}Appuyez sur ${BOLD}Entrée${RESET}${CYAN} pour continuer...${RESET}"
+  read -r
+}
+
+menu_service() {
+  clear
+  banner
+  echo -e "${BOLD}${BLUE}╔═════════════════════════════════════════════════════════╗${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${CYAN}${BOLD}GESTION DU SERVICE SYSTEMD${RESET}                           ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}╠═════════════════════════════════════════════════════════╣${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[1]${RESET} 📊 Statut du service                            ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[2]${RESET} ▶️  Démarrer le service                          ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[3]${RESET} ⏹️  Arrêter le service                           ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[4]${RESET} 🔄 Redémarrer le service                        ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}╠═════════════════════════════════════════════════════════╣${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${YELLOW}[0]${RESET} ↩️  Retour au menu principal                    ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}╚═════════════════════════════════════════════════════════╝${RESET}"
+  echo
+  echo -e -n "${CYAN}${BOLD}➜${RESET} Votre choix ${DIM}[0-4]${RESET} : "
+  read -r SUBCHOIX
+
+  case "$SUBCHOIX" in
+    1) service_status ;;
+    2) service_start ;;
+    3) service_stop ;;
+    4) service_restart ;;
+    0) return ;;
+    *) log_message "WARN" "Choix invalide : $SUBCHOIX" ;;
+  esac
+
+  echo
+  echo -e "${CYAN}Appuyez sur ${BOLD}Entrée${RESET}${CYAN} pour continuer...${RESET}"
+  read -r
 }
 
 ############################################
@@ -616,18 +1003,13 @@ while true; do
   afficher_menu
 
   case "$CHOIX" in
-    1) installer_agent_rpm ;;
-    2) ajouter_token ;;
-    3) service_status ;;
-    4) service_start ;;
-    5) service_stop ;;
-    6) service_restart ;;
-    7) verifier_status_agent ;;
-    8) verifier_version_agent ;;
-    9) desinstaller_agent ;;
-    10) afficher_logs ;;
-    11) health_check ;;
-    12)
+    1) menu_installation ;;
+    2) menu_controle_agent ;;
+    3) menu_securite ;;
+    4) menu_monitoring ;;
+    5) menu_avance ;;
+    6) menu_service ;;
+    0)
       echo
       echo -e "${BOLD}${GREEN}✓ Merci d'avoir utilisé Sentinelize v2.0 !${RESET}"
       echo -e "${DIM}À bientôt ! 👋${RESET}\n"
@@ -636,15 +1018,13 @@ while true; do
       ;;
     *)
       echo
-      echo -e "${BOLD}${RED}✗ Choix invalide !${RESET} Merci de saisir un numéro entre ${BOLD}1${RESET} et ${BOLD}12${RESET}."
+      echo -e "${BOLD}${RED}✗ Choix invalide !${RESET} Merci de saisir un numéro entre ${BOLD}0${RESET} et ${BOLD}6${RESET}."
       log_message "WARN" "Choix invalide dans le menu : $CHOIX"
+      echo
+      echo -e "${CYAN}Appuyez sur ${BOLD}Entrée${RESET}${CYAN} pour continuer...${RESET}"
+      read -r
       ;;
   esac
-
-  echo
-  echo -e "${DIM}─────────────────────────────────────────────────────${RESET}"
-  echo -e "${CYAN}Appuyez sur ${BOLD}Entrée${RESET}${CYAN} pour revenir au menu principal...${RESET}"
-  read -r
 done
 
 
