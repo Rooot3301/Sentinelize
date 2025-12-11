@@ -42,6 +42,9 @@ RED="\e[31m"
 CYAN="\e[36m"
 YELLOW="\e[33m"
 MAGENTA="\e[35m"
+BLUE="\e[34m"
+BOLD="\e[1m"
+DIM="\e[2m"
 RESET="\e[0m"
 
 ############################################
@@ -50,12 +53,21 @@ RESET="\e[0m"
 
 banner() {
   clear
-  echo -e "${CYAN}"
-  echo "╔════════════════════════════════════════════════════════╗"
-  echo "║             SENTINELONE AGENT MANAGER - RPM           ║"
-  echo "║v2.0                      By Root3301                  ║"
-  echo "╚════════════════════════════════════════════════════════╝"
+  echo -e "${CYAN}${BOLD}"
+  cat << "EOF"
+  /$$$$$$                        /$$     /$$                     /$$ /$$
+ /$$__  $$                      | $$    |__/                    | $$|__/
+| $$  \__/  /$$$$$$  /$$$$$$$  /$$$$$$   /$$ /$$$$$$$   /$$$$$$ | $$ /$$ /$$$$$$$$  /$$$$$$
+|  $$$$$$  /$$__  $$| $$__  $$|_  $$_/  | $$| $$__  $$ /$$__  $$| $$| $$|____ /$$/ /$$__  $$
+ \____  $$| $$$$$$$$| $$  \ $$  | $$    | $$| $$  \ $$| $$$$$$$$| $$| $$   /$$$$/ | $$$$$$$$
+ /$$  \ $$| $$_____/| $$  | $$  | $$ /$$| $$| $$  | $$| $$_____/| $$| $$  /$$__/  | $$_____/
+|  $$$$$$/|  $$$$$$$| $$  | $$  |  $$$$/| $$| $$  | $$|  $$$$$$$| $$| $$ /$$$$$$$$|  $$$$$$$
+ \______/  \_______/|__/  |__/   \___/  |__/|__/  |__/ \_______/|__/|__/|________/ \_______/
+EOF
   echo -e "${RESET}"
+  echo -e "${DIM}═══════════════════════════════════════════════════════════════════════════════════════${RESET}"
+  echo -e "${MAGENTA}${BOLD}              SentinelOne Agent Manager v2.0 ${RESET}${DIM}| By Root3301${RESET}"
+  echo -e "${DIM}═══════════════════════════════════════════════════════════════════════════════════════${RESET}\n"
 }
 
 ############################################
@@ -103,11 +115,11 @@ log_message() {
 
   # Console + couleurs
   case "$level" in
-    ERROR) echo -e "${RED}[ERREUR]${RESET} $msg" ;;
-    WARN)  echo -e "${YELLOW}[WARN]${RESET} $msg" ;;
-    INFO)  echo -e "${GREEN}[INFO]${RESET} $msg" ;;
-    DEBUG) echo -e "${MAGENTA}[DEBUG]${RESET} $msg" ;;
-    *)     echo "[LOG] $msg" ;;
+    ERROR) echo -e "${RED}${BOLD}✗${RESET} ${RED}$msg${RESET}" ;;
+    WARN)  echo -e "${YELLOW}${BOLD}⚠${RESET} ${YELLOW}$msg${RESET}" ;;
+    INFO)  echo -e "${GREEN}${BOLD}✓${RESET} ${GREEN}$msg${RESET}" ;;
+    DEBUG) echo -e "${MAGENTA}${BOLD}⚙${RESET} ${MAGENTA}$msg${RESET}" ;;
+    *)     echo -e "${DIM}▸ $msg${RESET}" ;;
   esac
 }
 
@@ -136,7 +148,9 @@ check_success_or_log() {
 
 check_root() {
   if [[ $EUID -ne 0 ]]; then
+    echo -e "${YELLOW}${BOLD}⚠${RESET} ${YELLOW} Script lancé sans privilèges root${RESET} ${DIM}- sudo sera utilisé automatiquement${RESET}"
     log_message "WARN" "Le script n'est pas lancé en root. Certaines opérations utiliseront sudo."
+    echo
   fi
 }
 
@@ -153,8 +167,12 @@ check_s1ctl() {
 ############################################
 
 installer_agent_rpm() {
-  display_message "$YELLOW" "\nInstallation de l'agent SentinelOne (RPM)"
-  read -rp "Chemin vers le fichier RPM (.rpm) : " RPM_PATH
+  echo
+  echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  📦 ${BOLD}Installation de l'agent SentinelOne${RESET}          ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
+  echo
+  read -rp "📂 Chemin vers le fichier RPM (.rpm) : " RPM_PATH
 
   if [[ ! -f "$RPM_PATH" ]]; then
     log_message "ERROR" "Le fichier spécifié n'existe pas : $RPM_PATH"
@@ -171,8 +189,12 @@ installer_agent_rpm() {
 }
 
 ajouter_token() {
-  display_message "$YELLOW" "\nAjout du token de gestion SentinelOne"
-  read -rp "Entrez le token d'enregistrement : " TOKEN
+  echo
+  echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  🔑 ${BOLD}Configuration du token de gestion${RESET}            ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
+  echo
+  read -rp "🔐 Entrez le token d'enregistrement : " TOKEN
 
   if [[ -z "$TOKEN" ]]; then
     log_message "ERROR" "Le token d'enregistrement est vide, opération annulée."
@@ -191,7 +213,11 @@ ajouter_token() {
 }
 
 service_status() {
-  display_message "$YELLOW" "\nStatut du service SentinelOne ($SERVICE_NAME)"
+  echo
+  echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  📊 ${BOLD}Statut du service $SERVICE_NAME${RESET}               ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
+  echo
   systemctl status "$SERVICE_NAME" --no-pager
   local rc=$?
   log_message "INFO" "Consultation du statut du service $SERVICE_NAME (rc=$rc)"
@@ -200,34 +226,47 @@ service_status() {
 }
 
 service_start() {
+  echo
+  echo -e "${CYAN}▶️  Démarrage du service ${BOLD}$SERVICE_NAME${RESET}${CYAN}...${RESET}"
   log_message "INFO" "Démarrage du service $SERVICE_NAME"
   sudo systemctl start "$SERVICE_NAME"
   local rc=$?
   check_success_or_log "$rc" \
     "Échec du démarrage du service $SERVICE_NAME" \
     "Service $SERVICE_NAME démarré avec succès."
+  echo
 }
 
 service_stop() {
+  echo
+  echo -e "${CYAN}⏹️  Arrêt du service ${BOLD}$SERVICE_NAME${RESET}${CYAN}...${RESET}"
   log_message "INFO" "Arrêt du service $SERVICE_NAME"
   sudo systemctl stop "$SERVICE_NAME"
   local rc=$?
   check_success_or_log "$rc" \
     "Échec de l'arrêt du service $SERVICE_NAME" \
     "Service $SERVICE_NAME arrêté avec succès."
+  echo
 }
 
 service_restart() {
+  echo
+  echo -e "${CYAN}🔄 Redémarrage du service ${BOLD}$SERVICE_NAME${RESET}${CYAN}...${RESET}"
   log_message "INFO" "Redémarrage du service $SERVICE_NAME"
   sudo systemctl restart "$SERVICE_NAME"
   local rc=$?
   check_success_or_log "$rc" \
     "Échec du redémarrage du service $SERVICE_NAME" \
     "Service $SERVICE_NAME redémarré avec succès."
+  echo
 }
 
 verifier_status_agent() {
-  display_message "$YELLOW" "\nStatut de l'agent (sentinelctl control status)"
+  echo
+  echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  🛡️  ${BOLD}Statut de l'agent SentinelOne${RESET}                ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
+  echo
   check_s1ctl || return 1
   sudo "$S1CTL" control status
   local rc=$?
@@ -237,7 +276,11 @@ verifier_status_agent() {
 }
 
 verifier_version_agent() {
-  display_message "$YELLOW" "\nVersion de l'agent SentinelOne"
+  echo
+  echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  ℹ️  ${BOLD}Version de l'agent SentinelOne${RESET}               ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
+  echo
   check_s1ctl || return 1
   sudo "$S1CTL" version
   local rc=$?
@@ -247,8 +290,13 @@ verifier_version_agent() {
 }
 
 desinstaller_agent() {
-  display_message "$YELLOW" "\nDésinstallation de l'agent SentinelOne"
-  read -rp "Confirmer la désinstallation de l'agent (y/N) : " CONFIRM
+  echo
+  echo -e "${BOLD}${RED}┌─────────────────────────────────────────────────────┐${RESET}"
+  echo -e "${BOLD}${RED}│${RESET}  🗑️  ${BOLD}Désinstallation de l'agent${RESET}                   ${BOLD}${RED}│${RESET}"
+  echo -e "${BOLD}${RED}└─────────────────────────────────────────────────────┘${RESET}"
+  echo
+  echo -e "${YELLOW}⚠️  Cette action va supprimer l'agent SentinelOne du système.${RESET}"
+  read -rp "❓ Confirmer la désinstallation (y/N) : " CONFIRM
 
   if [[ "$CONFIRM" != "y" && "$CONFIRM" != "Y" ]]; then
     log_message "INFO" "Désinstallation annulée par l'utilisateur."
@@ -265,75 +313,97 @@ desinstaller_agent() {
 }
 
 afficher_logs() {
-  display_message "$YELLOW" "\nLogs du SentinelOne Agent Manager"
+  echo
+  echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  📋 ${BOLD}Consultation des logs${RESET}                        ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
+  echo
+  echo -e "${BOLD}${MAGENTA}▶ Logs du script S1 Manager${RESET}"
   if [[ -f "$LOG_FILE" ]]; then
-    echo -e "${CYAN}Fichier : $LOG_FILE${RESET}"
+    echo -e "${DIM}Fichier : $LOG_FILE${RESET}"
+    echo -e "${DIM}─────────────────────────────────────────────────────${RESET}"
     tail -n 50 "$LOG_FILE"
   else
-    echo -e "${RED}Aucun fichier de log trouvé à $LOG_FILE${RESET}"
+    echo -e "${RED}✗ Aucun fichier de log trouvé à $LOG_FILE${RESET}"
   fi
 
-  echo -e "\n${CYAN}Derniers logs systemd du service $SERVICE_NAME${RESET}"
-  journalctl -u "$SERVICE_NAME" -n 30 --no-pager 2>/dev/null || echo "Pas de logs systemd disponibles."
+  echo
+  echo -e "${BOLD}${MAGENTA}▶ Logs systemd ($SERVICE_NAME)${RESET}"
+  echo -e "${DIM}─────────────────────────────────────────────────────${RESET}"
+  journalctl -u "$SERVICE_NAME" -n 30 --no-pager 2>/dev/null || echo -e "${YELLOW}⚠️  Pas de logs systemd disponibles.${RESET}"
 }
 
 health_check() {
-  display_message "$YELLOW" "\nHealth Check SentinelOne - Résumé"
+  echo
+  echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  🏥 ${BOLD}Health Check Complet${RESET}                         ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
+  echo
   log_message "INFO" "Exécution du health check SentinelOne."
 
   local overall_status="OK"
 
   # 1. binaire sentinelctl
+  echo -e "${BOLD}${BLUE}➤ Vérifications système${RESET}"
   if check_s1ctl; then
-    echo -e " - sentinelctl : ${GREEN}OK${RESET} ($S1CTL)"
+    echo -e "   ✓ sentinelctl : ${GREEN}${BOLD}DISPONIBLE${RESET} ${DIM}($S1CTL)${RESET}"
   else
-    echo -e " - sentinelctl : ${RED}KO${RESET} ($S1CTL introuvable)"
+    echo -e "   ✗ sentinelctl : ${RED}${BOLD}INTROUVABLE${RESET} ${DIM}($S1CTL)${RESET}"
     overall_status="WARN"
   fi
 
   # 2. Service systemd
+  echo
+  echo -e "${BOLD}${BLUE}➤ État du service systemd${RESET}"
   if systemctl is-enabled "$SERVICE_NAME" &>/dev/null; then
-    echo -e " - Service $SERVICE_NAME : ${GREEN}activé${RESET}"
+    echo -e "   ✓ Activation auto-démarrage : ${GREEN}${BOLD}ACTIVÉ${RESET}"
   else
-    echo -e " - Service $SERVICE_NAME : ${YELLOW}non activé${RESET}"
+    echo -e "   ⚠ Activation auto-démarrage : ${YELLOW}${BOLD}DÉSACTIVÉ${RESET}"
     overall_status="WARN"
   fi
 
   if systemctl is-active "$SERVICE_NAME" &>/dev/null; then
-    echo -e " - État runtime : ${GREEN}actif${RESET}"
+    echo -e "   ✓ État actuel : ${GREEN}${BOLD}EN COURS D'EXÉCUTION${RESET}"
   else
-    echo -e " - État runtime : ${RED}inactif${RESET}"
+    echo -e "   ✗ État actuel : ${RED}${BOLD}ARRÊTÉ${RESET}"
     overall_status="WARN"
   fi
 
   # 3. Status agent
   if check_s1ctl; then
-    echo -e "\n${CYAN}▶ sentinelctl control status${RESET}"
+    echo
+    echo -e "${BOLD}${BLUE}➤ Statut de l'agent (sentinelctl)${RESET}"
+    echo -e "${DIM}─────────────────────────────────────────────────────${RESET}"
     if ! sudo "$S1CTL" control status; then
-      echo -e "${RED}Erreur lors de l'exécution de control status${RESET}"
+      echo -e "${RED}✗ Erreur lors de l'exécution de control status${RESET}"
       overall_status="WARN"
     fi
   fi
 
   # 4. Version agent
   if check_s1ctl; then
-    echo -e "\n${CYAN}▶ sentinelctl version${RESET}"
+    echo
+    echo -e "${BOLD}${BLUE}➤ Version de l'agent${RESET}"
+    echo -e "${DIM}─────────────────────────────────────────────────────${RESET}"
     if ! sudo "$S1CTL" version; then
-      echo -e "${RED}Impossible de récupérer la version de l'agent${RESET}"
+      echo -e "${RED}✗ Impossible de récupérer la version de l'agent${RESET}"
       overall_status="WARN"
     fi
   fi
 
-  echo -e "\n${CYAN}▶ Derniers logs systemd ($SERVICE_NAME)${RESET}"
-  journalctl -u "$SERVICE_NAME" -n 20 --no-pager 2>/dev/null || echo "Pas de logs systemd disponibles."
+  echo
+  echo -e "${BOLD}${BLUE}➤ Logs systemd récents${RESET}"
+  echo -e "${DIM}─────────────────────────────────────────────────────${RESET}"
+  journalctl -u "$SERVICE_NAME" -n 20 --no-pager 2>/dev/null || echo -e "${YELLOW}⚠️  Pas de logs systemd disponibles.${RESET}"
 
   echo
+  echo -e "${DIM}═════════════════════════════════════════════════════${RESET}"
   if [[ "$overall_status" == "OK" ]]; then
-    display_message "$GREEN" "Health Check global : OK"
+    echo -e "${BOLD}${GREEN}✓ Health Check global : TOUS LES TESTS RÉUSSIS${RESET}"
     log_message "INFO" "Health Check OK."
     return 0
   else
-    display_message "$YELLOW" "Health Check global : AVERTISSEMENTS (voir détails ci-dessus)."
+    echo -e "${BOLD}${YELLOW}⚠ Health Check global : AVERTISSEMENTS DÉTECTÉS${RESET}"
     log_message "WARN" "Health Check avec avertissements."
     return 1
   fi
@@ -344,19 +414,29 @@ health_check() {
 ############################################
 
 print_help() {
-  cat <<EOF
-Usage : $0 [OPTION]
-
-Options (mode non-interactif) :
-  --install-rpm <chemin>   Installer l'agent depuis un fichier RPM
-  --set-token <token>      Définir le token de management
-  --status                 Afficher statut service + agent
-  --health-check           Lancer un health check complet
-  --version                Afficher la version de l'agent
-  --help                   Afficher cette aide
-
-Sans option, un menu interactif est affiché.
+  echo -e "${BOLD}${CYAN}"
+  cat << "EOF"
+  /$$$$$$                        /$$     /$$                     /$$ /$$
+ /$$__  $$                      | $$    |__/                    | $$|__/
+| $$  \__/  /$$$$$$  /$$$$$$$  /$$$$$$   /$$ /$$$$$$$   /$$$$$$ | $$ /$$ /$$$$$$$$  /$$$$$$
+|  $$$$$$  /$$__  $$| $$__  $$|_  $$_/  | $$| $$__  $$ /$$__  $$| $$| $$|____ /$$/ /$$__  $$
+ \____  $$| $$$$$$$$| $$  \ $$  | $$    | $$| $$  \ $$| $$$$$$$$| $$| $$   /$$$$/ | $$$$$$$$
+ /$$  \ $$| $$_____/| $$  | $$  | $$ /$$| $$| $$  | $$| $$_____/| $$| $$  /$$__/  | $$_____/
+|  $$$$$$/|  $$$$$$$| $$  | $$  |  $$$$/| $$| $$  | $$|  $$$$$$$| $$| $$ /$$$$$$$$|  $$$$$$$
+ \______/  \_______/|__/  |__/   \___/  |__/|__/  |__/ \_______/|__/|__/|________/ \_______/
 EOF
+  echo -e "${RESET}"
+  echo -e "${DIM}═══════════════════════════════════════════════════════════════════════════════════════${RESET}"
+  echo -e "${BOLD}Usage :${RESET} $0 ${DIM}[OPTION]${RESET}\n"
+  echo -e "${BOLD}${BLUE}Options (mode CLI non-interactif) :${RESET}"
+  echo -e "  ${GREEN}--install-rpm${RESET} <chemin>   📦 Installer l'agent depuis un fichier RPM"
+  echo -e "  ${GREEN}--set-token${RESET} <token>      🔑 Définir le token de management"
+  echo -e "  ${GREEN}--status${RESET}                 📊 Afficher statut service + agent"
+  echo -e "  ${GREEN}--health-check${RESET}           🏥 Lancer un health check complet"
+  echo -e "  ${GREEN}--version${RESET}                ℹ️  Afficher la version de l'agent"
+  echo -e "  ${GREEN}--help${RESET}, ${GREEN}-h${RESET}               ❓ Afficher cette aide"
+  echo
+  echo -e "${DIM}Sans option, un menu interactif est affiché.${RESET}\n"
 }
 
 handle_cli() {
@@ -421,21 +501,33 @@ handle_cli() {
 ############################################
 
 afficher_menu() {
-  echo -e "${CYAN}Que souhaitez-vous faire ?${RESET}"
-  echo "1 - Installer un agent SentinelOne (RPM local)"
-  echo "2 - Ajouter / modifier le token de gestion"
-  echo "3 - Statut du service ($SERVICE_NAME)"
-  echo "4 - Démarrer le service"
-  echo "5 - Arrêter le service"
-  echo "6 - Redémarrer le service"
-  echo "7 - Statut de l'agent (sentinelctl control status)"
-  echo "8 - Version de l'agent"
-  echo "9 - Désinstaller l'agent"
-  echo "10 - Afficher les logs (script + systemd)"
-  echo "11 - Health Check complet"
-  echo "12 - Quitter"
+  echo -e "${BOLD}${BLUE}╔═══════════════════════════════════════════════════════════════════╗${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${CYAN}${BOLD}MENU PRINCIPAL${RESET}                                                  ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}╠═══════════════════════════════════════════════════════════════════╣${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${BOLD}Installation & Configuration${RESET}                                  ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}    ${GREEN}[1]${RESET} 📦 Installer un agent SentinelOne (RPM)                 ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}    ${GREEN}[2]${RESET} 🔑 Ajouter/modifier le token de gestion                 ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}╠═══════════════════════════════════════════════════════════════════╣${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${BOLD}Gestion du Service${RESET}                                            ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}    ${GREEN}[3]${RESET} 📊 Statut du service ${DIM}($SERVICE_NAME)${RESET}                     ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}    ${GREEN}[4]${RESET} ▶️  Démarrer le service                                  ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}    ${GREEN}[5]${RESET} ⏹️  Arrêter le service                                   ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}    ${GREEN}[6]${RESET} 🔄 Redémarrer le service                                ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}╠═══════════════════════════════════════════════════════════════════╣${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${BOLD}Monitoring & Diagnostic${RESET}                                       ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}    ${GREEN}[7]${RESET} 🛡️  Statut de l'agent (sentinelctl)                     ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}    ${GREEN}[8]${RESET} ℹ️  Version de l'agent                                  ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}    ${GREEN}[10]${RESET} 📋 Afficher les logs (script + systemd)               ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}    ${GREEN}[11]${RESET} 🏥 Health Check complet                               ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}╠═══════════════════════════════════════════════════════════════════╣${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${BOLD}Maintenance${RESET}                                                   ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}    ${RED}[9]${RESET} 🗑️  Désinstaller l'agent                                 ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}╠═══════════════════════════════════════════════════════════════════╣${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}    ${YELLOW}[12]${RESET} 🚪 Quitter                                            ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}╚═══════════════════════════════════════════════════════════════════╝${RESET}"
   echo
-  read -rp "Choix [1-12] : " CHOIX
+  echo -e -n "${CYAN}${BOLD}➜${RESET} Votre choix ${DIM}[1-12]${RESET} : "
+  read -r CHOIX
 }
 
 ############################################
@@ -467,17 +559,22 @@ while true; do
     10) afficher_logs ;;
     11) health_check ;;
     12)
-      display_message "$GREEN" "Merci d'avoir utilisé SentinelOne Agent Manager v2.0."
+      echo
+      echo -e "${BOLD}${GREEN}✓ Merci d'avoir utilisé Sentinelize v2.0 !${RESET}"
+      echo -e "${DIM}À bientôt ! 👋${RESET}\n"
       log_message "INFO" "Script terminé par l'utilisateur."
       exit 0
       ;;
     *)
-      display_message "$RED" "⚠️ Choix invalide. Merci de saisir un numéro entre 1 et 12."
+      echo
+      echo -e "${BOLD}${RED}✗ Choix invalide !${RESET} Merci de saisir un numéro entre ${BOLD}1${RESET} et ${BOLD}12${RESET}."
       log_message "WARN" "Choix invalide dans le menu : $CHOIX"
       ;;
   esac
 
-  echo -e "\nAppuyez sur Entrée pour revenir au menu principal..."
+  echo
+  echo -e "${DIM}─────────────────────────────────────────────────────${RESET}"
+  echo -e "${CYAN}Appuyez sur ${BOLD}Entrée${RESET}${CYAN} pour revenir au menu principal...${RESET}"
   read -r
 done
 
