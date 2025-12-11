@@ -115,10 +115,10 @@ log_message() {
 
   # Console + couleurs
   case "$level" in
-    ERROR) echo -e "${RED}${BOLD}✗${RESET} ${RED}$msg${RESET}" ;;
-    WARN)  echo -e "${YELLOW}${BOLD}⚠${RESET} ${YELLOW}$msg${RESET}" ;;
-    INFO)  echo -e "${GREEN}${BOLD}✓${RESET} ${GREEN}$msg${RESET}" ;;
-    DEBUG) echo -e "${MAGENTA}${BOLD}⚙${RESET} ${MAGENTA}$msg${RESET}" ;;
+    ERROR) echo -e "${RED}${BOLD}[ERREUR]${RESET} ${RED}$msg${RESET}" ;;
+    WARN)  echo -e "${YELLOW}${BOLD}[WARN]${RESET} ${YELLOW}$msg${RESET}" ;;
+    INFO)  echo -e "${GREEN}${BOLD}[OK]${RESET} ${GREEN}$msg${RESET}" ;;
+    DEBUG) echo -e "${MAGENTA}${BOLD}[DEBUG]${RESET} ${MAGENTA}$msg${RESET}" ;;
     *)     echo -e "${DIM}▸ $msg${RESET}" ;;
   esac
 }
@@ -169,12 +169,12 @@ check_s1ctl() {
 installer_agent_rpm() {
   echo
   echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
-  echo -e "${BOLD}${CYAN}│${RESET}  📦 ${BOLD}Installation de l'agent SentinelOne${RESET}          ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  ${BOLD}Installation de l'agent SentinelOne${RESET}             ${BOLD}${CYAN}│${RESET}"
   echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
   echo
   echo -e "${BOLD}Choisissez le mode d'installation :${RESET}"
-  echo -e "  ${GREEN}[1]${RESET} 📂 Fichier local (chemin)"
-  echo -e "  ${GREEN}[2]${RESET} 🌐 URL de téléchargement"
+  echo -e "  ${GREEN}[1]${RESET} Fichier local (chemin)"
+  echo -e "  ${GREEN}[2]${RESET} URL de téléchargement"
   echo
   read -rp "Votre choix [1-2] : " INSTALL_MODE
 
@@ -183,14 +183,14 @@ installer_agent_rpm() {
 
   case "$INSTALL_MODE" in
     1)
-      read -rp "📂 Chemin vers le fichier RPM (.rpm) : " RPM_PATH
+      read -rp "Chemin vers le fichier RPM (.rpm) : " RPM_PATH
       if [[ ! -f "$RPM_PATH" ]]; then
         log_message "ERROR" "Le fichier spécifié n'existe pas : $RPM_PATH"
         return 1
       fi
       ;;
     2)
-      read -rp "🌐 URL du fichier RPM : " RPM_URL
+      read -rp "URL du fichier RPM : " RPM_URL
       if [[ -z "$RPM_URL" ]]; then
         log_message "ERROR" "URL vide, opération annulée."
         return 1
@@ -232,10 +232,10 @@ installer_agent_rpm() {
 ajouter_token() {
   echo
   echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
-  echo -e "${BOLD}${CYAN}│${RESET}  🔑 ${BOLD}Configuration du token de gestion${RESET}            ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  ${BOLD}Configuration du token de gestion${RESET}               ${BOLD}${CYAN}│${RESET}"
   echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
   echo
-  read -rp "🔐 Entrez le token d'enregistrement : " TOKEN
+  read -rp "Entrez le token d'enregistrement : " TOKEN
 
   if [[ -z "$TOKEN" ]]; then
     log_message "ERROR" "Le token d'enregistrement est vide, opération annulée."
@@ -256,7 +256,7 @@ ajouter_token() {
 service_status() {
   echo
   echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
-  echo -e "${BOLD}${CYAN}│${RESET}  📊 ${BOLD}Statut du service $SERVICE_NAME${RESET}               ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  ${BOLD}Statut du service $SERVICE_NAME${RESET}                  ${BOLD}${CYAN}│${RESET}"
   echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
   echo
   systemctl status "$SERVICE_NAME" --no-pager
@@ -305,7 +305,7 @@ service_restart() {
 verifier_status_agent() {
   echo
   echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
-  echo -e "${BOLD}${CYAN}│${RESET}  🛡️  ${BOLD}Statut de l'agent SentinelOne${RESET}                ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  ${BOLD}Statut de l'agent SentinelOne${RESET}                   ${BOLD}${CYAN}│${RESET}"
   echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
   echo
   check_s1ctl || return 1
@@ -319,7 +319,7 @@ verifier_status_agent() {
 verifier_version_agent() {
   echo
   echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
-  echo -e "${BOLD}${CYAN}│${RESET}  ℹ️  ${BOLD}Version de l'agent SentinelOne${RESET}               ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  ${BOLD}Version de l'agent SentinelOne${RESET}                  ${BOLD}${CYAN}│${RESET}"
   echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
   echo
   check_s1ctl || return 1
@@ -333,11 +333,11 @@ verifier_version_agent() {
 desinstaller_agent() {
   echo
   echo -e "${BOLD}${RED}┌─────────────────────────────────────────────────────┐${RESET}"
-  echo -e "${BOLD}${RED}│${RESET}  🗑️  ${BOLD}Désinstallation de l'agent${RESET}                   ${BOLD}${RED}│${RESET}"
+  echo -e "${BOLD}${RED}│${RESET}  ${BOLD}Désinstallation de l'agent${RESET}                      ${BOLD}${RED}│${RESET}"
   echo -e "${BOLD}${RED}└─────────────────────────────────────────────────────┘${RESET}"
   echo
-  echo -e "${YELLOW}⚠️  Cette action va supprimer l'agent SentinelOne du système.${RESET}"
-  read -rp "❓ Confirmer la désinstallation (y/N) : " CONFIRM
+  echo -e "${YELLOW}ATTENTION : Cette action va supprimer l'agent SentinelOne du système.${RESET}"
+  read -rp "Confirmer la désinstallation (y/N) : " CONFIRM
 
   if [[ "$CONFIRM" != "y" && "$CONFIRM" != "Y" ]]; then
     log_message "INFO" "Désinstallation annulée par l'utilisateur."
@@ -356,7 +356,7 @@ desinstaller_agent() {
 afficher_logs() {
   echo
   echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
-  echo -e "${BOLD}${CYAN}│${RESET}  📋 ${BOLD}Consultation des logs${RESET}                        ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  ${BOLD}Consultation des logs${RESET}                           ${BOLD}${CYAN}│${RESET}"
   echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
   echo
   echo -e "${BOLD}${MAGENTA}▶ Logs du script S1 Manager${RESET}"
@@ -365,19 +365,19 @@ afficher_logs() {
     echo -e "${DIM}─────────────────────────────────────────────────────${RESET}"
     tail -n 50 "$LOG_FILE"
   else
-    echo -e "${RED}✗ Aucun fichier de log trouvé à $LOG_FILE${RESET}"
+  echo -e "${RED}Aucun fichier de log trouvé à $LOG_FILE${RESET}"
   fi
 
   echo
   echo -e "${BOLD}${MAGENTA}▶ Logs systemd ($SERVICE_NAME)${RESET}"
   echo -e "${DIM}─────────────────────────────────────────────────────${RESET}"
-  journalctl -u "$SERVICE_NAME" -n 30 --no-pager 2>/dev/null || echo -e "${YELLOW}⚠️  Pas de logs systemd disponibles.${RESET}"
+  journalctl -u "$SERVICE_NAME" -n 30 --no-pager 2>/dev/null || echo -e "${YELLOW}Pas de logs systemd disponibles.${RESET}"
 }
 
 health_check() {
   echo
   echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
-  echo -e "${BOLD}${CYAN}│${RESET}  🏥 ${BOLD}Health Check Complet${RESET}                         ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  ${BOLD}Health Check Complet${RESET}                            ${BOLD}${CYAN}│${RESET}"
   echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
   echo
   log_message "INFO" "Exécution du health check SentinelOne."
@@ -387,9 +387,9 @@ health_check() {
   # 1. binaire sentinelctl
   echo -e "${BOLD}${BLUE}➤ Vérifications système${RESET}"
   if check_s1ctl; then
-    echo -e "   ✓ sentinelctl : ${GREEN}${BOLD}DISPONIBLE${RESET} ${DIM}($S1CTL)${RESET}"
+    echo -e "   [OK] sentinelctl : ${GREEN}${BOLD}DISPONIBLE${RESET} ${DIM}($S1CTL)${RESET}"
   else
-    echo -e "   ✗ sentinelctl : ${RED}${BOLD}INTROUVABLE${RESET} ${DIM}($S1CTL)${RESET}"
+    echo -e "   [ERREUR] sentinelctl : ${RED}${BOLD}INTROUVABLE${RESET} ${DIM}($S1CTL)${RESET}"
     overall_status="WARN"
   fi
 
@@ -397,16 +397,16 @@ health_check() {
   echo
   echo -e "${BOLD}${BLUE}➤ État du service systemd${RESET}"
   if systemctl is-enabled "$SERVICE_NAME" &>/dev/null; then
-    echo -e "   ✓ Activation auto-démarrage : ${GREEN}${BOLD}ACTIVÉ${RESET}"
+    echo -e "   [OK] Activation auto-démarrage : ${GREEN}${BOLD}ACTIVÉ${RESET}"
   else
-    echo -e "   ⚠ Activation auto-démarrage : ${YELLOW}${BOLD}DÉSACTIVÉ${RESET}"
+    echo -e "   [WARN] Activation auto-démarrage : ${YELLOW}${BOLD}DÉSACTIVÉ${RESET}"
     overall_status="WARN"
   fi
 
   if systemctl is-active "$SERVICE_NAME" &>/dev/null; then
-    echo -e "   ✓ État actuel : ${GREEN}${BOLD}EN COURS D'EXÉCUTION${RESET}"
+    echo -e "   [OK] État actuel : ${GREEN}${BOLD}EN COURS D'EXÉCUTION${RESET}"
   else
-    echo -e "   ✗ État actuel : ${RED}${BOLD}ARRÊTÉ${RESET}"
+    echo -e "   [ERREUR] État actuel : ${RED}${BOLD}ARRÊTÉ${RESET}"
     overall_status="WARN"
   fi
 
@@ -416,7 +416,7 @@ health_check() {
     echo -e "${BOLD}${BLUE}➤ Statut de l'agent (sentinelctl)${RESET}"
     echo -e "${DIM}─────────────────────────────────────────────────────${RESET}"
     if ! sudo "$S1CTL" control status; then
-      echo -e "${RED}✗ Erreur lors de l'exécution de control status${RESET}"
+      echo -e "${RED}[ERREUR] Erreur lors de l'exécution de control status${RESET}"
       overall_status="WARN"
     fi
   fi
@@ -427,7 +427,7 @@ health_check() {
     echo -e "${BOLD}${BLUE}➤ Version de l'agent${RESET}"
     echo -e "${DIM}─────────────────────────────────────────────────────${RESET}"
     if ! sudo "$S1CTL" version; then
-      echo -e "${RED}✗ Impossible de récupérer la version de l'agent${RESET}"
+      echo -e "${RED}[ERREUR] Impossible de récupérer la version de l'agent${RESET}"
       overall_status="WARN"
     fi
   fi
@@ -435,16 +435,16 @@ health_check() {
   echo
   echo -e "${BOLD}${BLUE}➤ Logs systemd récents${RESET}"
   echo -e "${DIM}─────────────────────────────────────────────────────${RESET}"
-  journalctl -u "$SERVICE_NAME" -n 20 --no-pager 2>/dev/null || echo -e "${YELLOW}⚠️  Pas de logs systemd disponibles.${RESET}"
+  journalctl -u "$SERVICE_NAME" -n 20 --no-pager 2>/dev/null || echo -e "${YELLOW}Pas de logs systemd disponibles.${RESET}"
 
   echo
   echo -e "${DIM}═════════════════════════════════════════════════════${RESET}"
   if [[ "$overall_status" == "OK" ]]; then
-    echo -e "${BOLD}${GREEN}✓ Health Check global : TOUS LES TESTS RÉUSSIS${RESET}"
+    echo -e "${BOLD}${GREEN}[OK] Health Check global : TOUS LES TESTS RÉUSSIS${RESET}"
     log_message "INFO" "Health Check OK."
     return 0
   else
-    echo -e "${BOLD}${YELLOW}⚠ Health Check global : AVERTISSEMENTS DÉTECTÉS${RESET}"
+    echo -e "${BOLD}${YELLOW}[WARN] Health Check global : AVERTISSEMENTS DÉTECTÉS${RESET}"
     log_message "WARN" "Health Check avec avertissements."
     return 1
   fi
@@ -458,7 +458,7 @@ health_check() {
 scan_start() {
   echo
   echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
-  echo -e "${BOLD}${CYAN}│${RESET}  🔍 ${BOLD}Démarrage d'un scan${RESET}                          ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  ${BOLD}Démarrage d'un scan${RESET}                             ${BOLD}${CYAN}│${RESET}"
   echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
   echo
   check_s1ctl || return 1
@@ -471,7 +471,7 @@ scan_start() {
 scan_abort() {
   echo
   echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
-  echo -e "${BOLD}${CYAN}│${RESET}  ⏹️  ${BOLD}Arrêt du scan en cours${RESET}                       ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  ${BOLD}Arrêt du scan en cours${RESET}                          ${BOLD}${CYAN}│${RESET}"
   echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
   echo
   check_s1ctl || return 1
@@ -484,7 +484,7 @@ scan_abort() {
 scan_status() {
   echo
   echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
-  echo -e "${BOLD}${CYAN}│${RESET}  📊 ${BOLD}Statut du scan${RESET}                               ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  ${BOLD}Statut du scan${RESET}                                  ${BOLD}${CYAN}│${RESET}"
   echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
   echo
   check_s1ctl || return 1
@@ -499,7 +499,7 @@ scan_status() {
 policy_status() {
   echo
   echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
-  echo -e "${BOLD}${CYAN}│${RESET}  📋 ${BOLD}Statut des policies${RESET}                          ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  ${BOLD}Statut des policies${RESET}                             ${BOLD}${CYAN}│${RESET}"
   echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
   echo
   check_s1ctl || return 1
@@ -514,7 +514,7 @@ policy_status() {
 quarantine_list() {
   echo
   echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
-  echo -e "${BOLD}${CYAN}│${RESET}  🔒 ${BOLD}Liste des fichiers en quarantaine${RESET}           ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  ${BOLD}Liste des fichiers en quarantaine${RESET}              ${BOLD}${CYAN}│${RESET}"
   echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
   echo
   check_s1ctl || return 1
@@ -550,7 +550,7 @@ quarantine_list() {
 agent_start() {
   echo
   echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
-  echo -e "${BOLD}${CYAN}│${RESET}  ▶️  ${BOLD}Démarrage de l'agent${RESET}                         ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  ${BOLD}Démarrage de l'agent${RESET}                            ${BOLD}${CYAN}│${RESET}"
   echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
   echo
   check_s1ctl || return 1
@@ -563,7 +563,7 @@ agent_start() {
 agent_stop() {
   echo
   echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
-  echo -e "${BOLD}${CYAN}│${RESET}  ⏹️  ${BOLD}Arrêt de l'agent${RESET}                             ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  ${BOLD}Arrêt de l'agent${RESET}                                ${BOLD}${CYAN}│${RESET}"
   echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
   echo
   check_s1ctl || return 1
@@ -576,7 +576,7 @@ agent_stop() {
 agent_upgrade() {
   echo
   echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
-  echo -e "${BOLD}${CYAN}│${RESET}  🔄 ${BOLD}Mise à jour de l'agent${RESET}                       ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  ${BOLD}Mise à jour de l'agent${RESET}                          ${BOLD}${CYAN}│${RESET}"
   echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
   echo
   check_s1ctl || return 1
@@ -590,7 +590,7 @@ agent_upgrade() {
 show_agent_log() {
   echo
   echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
-  echo -e "${BOLD}${CYAN}│${RESET}  📄 ${BOLD}Logs de l'agent${RESET}                              ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  ${BOLD}Logs de l'agent${RESET}                                 ${BOLD}${CYAN}│${RESET}"
   echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
   echo
   check_s1ctl || return 1
@@ -605,7 +605,7 @@ show_agent_log() {
 asset_management() {
   echo
   echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
-  echo -e "${BOLD}${CYAN}│${RESET}  💼 ${BOLD}Gestion des assets${RESET}                           ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  ${BOLD}Gestion des assets${RESET}                              ${BOLD}${CYAN}│${RESET}"
   echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
   echo
   check_s1ctl || return 1
@@ -620,7 +620,7 @@ asset_management() {
 engines_operations() {
   echo
   echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
-  echo -e "${BOLD}${CYAN}│${RESET}  ⚙️  ${BOLD}Opérations sur les engines${RESET}                   ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  ${BOLD}Opérations sur les engines${RESET}                      ${BOLD}${CYAN}│${RESET}"
   echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
   echo
   check_s1ctl || return 1
@@ -635,7 +635,7 @@ engines_operations() {
 firewall_operations() {
   echo
   echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
-  echo -e "${BOLD}${CYAN}│${RESET}  🔥 ${BOLD}Opérations firewall${RESET}                          ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  ${BOLD}Opérations firewall${RESET}                             ${BOLD}${CYAN}│${RESET}"
   echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
   echo
   check_s1ctl || return 1
@@ -650,7 +650,7 @@ firewall_operations() {
 management_detector() {
   echo
   echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
-  echo -e "${BOLD}${CYAN}│${RESET}  🔎 ${BOLD}Détection de l'agent${RESET}                         ${BOLD}${CYAN}│${RESET}"
+  echo -e "${BOLD}${CYAN}│${RESET}  ${BOLD}Détection de l'agent${RESET}                            ${BOLD}${CYAN}│${RESET}"
   echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
   echo
   check_s1ctl || return 1
@@ -784,17 +784,17 @@ afficher_menu() {
   echo -e "${BOLD}${BLUE}╔═════════════════════════════════════════════════════════╗${RESET}"
   echo -e "${BOLD}${BLUE}║${RESET}  ${CYAN}${BOLD}MENU PRINCIPAL${RESET}                                        ${BOLD}${BLUE}║${RESET}"
   echo -e "${BOLD}${BLUE}╠═════════════════════════════════════════════════════════╣${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[1]${RESET} 📦 Installation & Configuration                 ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[2]${RESET} 🎯 Contrôle de l'agent                          ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[3]${RESET} 🛡️  Opérations de sécurité                      ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[4]${RESET} 📊 Monitoring & Diagnostic                      ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[5]${RESET} ⚙️  Configuration avancée                       ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[6]${RESET} 🔧 Gestion du service systemd                   ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[1]${RESET} Installation & Configuration                    ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[2]${RESET} Contrôle de l'agent                             ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[3]${RESET} Opérations de sécurité                          ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[4]${RESET} Monitoring & Diagnostic                         ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[5]${RESET} Configuration avancée                           ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[6]${RESET} Gestion du service systemd                      ${BOLD}${BLUE}║${RESET}"
   echo -e "${BOLD}${BLUE}╠═════════════════════════════════════════════════════════╣${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${YELLOW}[0]${RESET} 🚪 Quitter                                      ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${YELLOW}[0]${RESET} Quitter                                         ${BOLD}${BLUE}║${RESET}"
   echo -e "${BOLD}${BLUE}╚═════════════════════════════════════════════════════════╝${RESET}"
   echo
-  echo -e -n "${CYAN}${BOLD}➜${RESET} Votre choix ${DIM}[0-6]${RESET} : "
+  echo -e -n "${CYAN}${BOLD}>${RESET} Votre choix ${DIM}[0-6]${RESET} : "
   read -r CHOIX
 }
 
@@ -804,15 +804,15 @@ menu_installation() {
   echo -e "${BOLD}${BLUE}╔═════════════════════════════════════════════════════════╗${RESET}"
   echo -e "${BOLD}${BLUE}║${RESET}  ${CYAN}${BOLD}INSTALLATION & CONFIGURATION${RESET}                         ${BOLD}${BLUE}║${RESET}"
   echo -e "${BOLD}${BLUE}╠═════════════════════════════════════════════════════════╣${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[1]${RESET} 📦 Installer l'agent SentinelOne (RPM)         ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[2]${RESET} 🔑 Configurer le token de management           ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[3]${RESET} 🔄 Mettre à jour l'agent                        ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${RED}[4]${RESET} 🗑️  Désinstaller l'agent                         ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[1]${RESET} Installer l'agent SentinelOne (RPM)            ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[2]${RESET} Configurer le token de management              ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[3]${RESET} Mettre à jour l'agent                           ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${RED}[4]${RESET} Désinstaller l'agent                            ${BOLD}${BLUE}║${RESET}"
   echo -e "${BOLD}${BLUE}╠═════════════════════════════════════════════════════════╣${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${YELLOW}[0]${RESET} ↩️  Retour au menu principal                    ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${YELLOW}[0]${RESET} Retour au menu principal                       ${BOLD}${BLUE}║${RESET}"
   echo -e "${BOLD}${BLUE}╚═════════════════════════════════════════════════════════╝${RESET}"
   echo
-  echo -e -n "${CYAN}${BOLD}➜${RESET} Votre choix ${DIM}[0-4]${RESET} : "
+  echo -e -n "${CYAN}${BOLD}>${RESET} Votre choix ${DIM}[0-4]${RESET} : "
   read -r SUBCHOIX
 
   case "$SUBCHOIX" in
@@ -835,16 +835,16 @@ menu_controle_agent() {
   echo -e "${BOLD}${BLUE}╔═════════════════════════════════════════════════════════╗${RESET}"
   echo -e "${BOLD}${BLUE}║${RESET}  ${CYAN}${BOLD}CONTRÔLE DE L'AGENT${RESET}                                  ${BOLD}${BLUE}║${RESET}"
   echo -e "${BOLD}${BLUE}╠═════════════════════════════════════════════════════════╣${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[1]${RESET} ▶️  Démarrer l'agent                             ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[2]${RESET} ⏹️  Arrêter l'agent                              ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[3]${RESET} 📊 Statut de l'agent                            ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[4]${RESET} ℹ️  Version de l'agent                          ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[5]${RESET} 🔎 Détection de l'agent                         ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[1]${RESET} Démarrer l'agent                                ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[2]${RESET} Arrêter l'agent                                 ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[3]${RESET} Statut de l'agent                               ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[4]${RESET} Version de l'agent                              ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[5]${RESET} Détection de l'agent                            ${BOLD}${BLUE}║${RESET}"
   echo -e "${BOLD}${BLUE}╠═════════════════════════════════════════════════════════╣${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${YELLOW}[0]${RESET} ↩️  Retour au menu principal                    ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${YELLOW}[0]${RESET} Retour au menu principal                       ${BOLD}${BLUE}║${RESET}"
   echo -e "${BOLD}${BLUE}╚═════════════════════════════════════════════════════════╝${RESET}"
   echo
-  echo -e -n "${CYAN}${BOLD}➜${RESET} Votre choix ${DIM}[0-5]${RESET} : "
+  echo -e -n "${CYAN}${BOLD}>${RESET} Votre choix ${DIM}[0-5]${RESET} : "
   read -r SUBCHOIX
 
   case "$SUBCHOIX" in
@@ -868,17 +868,17 @@ menu_securite() {
   echo -e "${BOLD}${BLUE}╔═════════════════════════════════════════════════════════╗${RESET}"
   echo -e "${BOLD}${BLUE}║${RESET}  ${CYAN}${BOLD}OPÉRATIONS DE SÉCURITÉ${RESET}                               ${BOLD}${BLUE}║${RESET}"
   echo -e "${BOLD}${BLUE}╠═════════════════════════════════════════════════════════╣${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[1]${RESET} 🔍 Démarrer un scan                             ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[2]${RESET} ⏹️  Arrêter le scan en cours                     ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[3]${RESET} 📊 Statut du scan                               ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[4]${RESET} 📋 Statut des policies                          ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[5]${RESET} 🔒 Fichiers en quarantaine                      ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[6]${RESET} 🔥 Opérations firewall                          ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[1]${RESET} Démarrer un scan                                ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[2]${RESET} Arrêter le scan en cours                        ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[3]${RESET} Statut du scan                                  ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[4]${RESET} Statut des policies                             ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[5]${RESET} Fichiers en quarantaine                         ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[6]${RESET} Opérations firewall                             ${BOLD}${BLUE}║${RESET}"
   echo -e "${BOLD}${BLUE}╠═════════════════════════════════════════════════════════╣${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${YELLOW}[0]${RESET} ↩️  Retour au menu principal                    ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${YELLOW}[0]${RESET} Retour au menu principal                       ${BOLD}${BLUE}║${RESET}"
   echo -e "${BOLD}${BLUE}╚═════════════════════════════════════════════════════════╝${RESET}"
   echo
-  echo -e -n "${CYAN}${BOLD}➜${RESET} Votre choix ${DIM}[0-6]${RESET} : "
+  echo -e -n "${CYAN}${BOLD}>${RESET} Votre choix ${DIM}[0-6]${RESET} : "
   read -r SUBCHOIX
 
   case "$SUBCHOIX" in
@@ -903,15 +903,15 @@ menu_monitoring() {
   echo -e "${BOLD}${BLUE}╔═════════════════════════════════════════════════════════╗${RESET}"
   echo -e "${BOLD}${BLUE}║${RESET}  ${CYAN}${BOLD}MONITORING & DIAGNOSTIC${RESET}                              ${BOLD}${BLUE}║${RESET}"
   echo -e "${BOLD}${BLUE}╠═════════════════════════════════════════════════════════╣${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[1]${RESET} 🏥 Health Check complet                         ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[2]${RESET} 📄 Logs de l'agent                              ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[3]${RESET} 📋 Logs du script & systemd                     ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[4]${RESET} 📊 Statut complet (service + agent)            ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[1]${RESET} Health Check complet                            ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[2]${RESET} Logs de l'agent                                 ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[3]${RESET} Logs du script & systemd                        ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[4]${RESET} Statut complet (service + agent)               ${BOLD}${BLUE}║${RESET}"
   echo -e "${BOLD}${BLUE}╠═════════════════════════════════════════════════════════╣${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${YELLOW}[0]${RESET} ↩️  Retour au menu principal                    ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${YELLOW}[0]${RESET} Retour au menu principal                       ${BOLD}${BLUE}║${RESET}"
   echo -e "${BOLD}${BLUE}╚═════════════════════════════════════════════════════════╝${RESET}"
   echo
-  echo -e -n "${CYAN}${BOLD}➜${RESET} Votre choix ${DIM}[0-4]${RESET} : "
+  echo -e -n "${CYAN}${BOLD}>${RESET} Votre choix ${DIM}[0-4]${RESET} : "
   read -r SUBCHOIX
 
   case "$SUBCHOIX" in
@@ -934,13 +934,13 @@ menu_avance() {
   echo -e "${BOLD}${BLUE}╔═════════════════════════════════════════════════════════╗${RESET}"
   echo -e "${BOLD}${BLUE}║${RESET}  ${CYAN}${BOLD}CONFIGURATION AVANCÉE${RESET}                                ${BOLD}${BLUE}║${RESET}"
   echo -e "${BOLD}${BLUE}╠═════════════════════════════════════════════════════════╣${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[1]${RESET} 💼 Gestion des assets                           ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[2]${RESET} ⚙️  Opérations sur les engines                  ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[1]${RESET} Gestion des assets                              ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[2]${RESET} Opérations sur les engines                      ${BOLD}${BLUE}║${RESET}"
   echo -e "${BOLD}${BLUE}╠═════════════════════════════════════════════════════════╣${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${YELLOW}[0]${RESET} ↩️  Retour au menu principal                    ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${YELLOW}[0]${RESET} Retour au menu principal                       ${BOLD}${BLUE}║${RESET}"
   echo -e "${BOLD}${BLUE}╚═════════════════════════════════════════════════════════╝${RESET}"
   echo
-  echo -e -n "${CYAN}${BOLD}➜${RESET} Votre choix ${DIM}[0-2]${RESET} : "
+  echo -e -n "${CYAN}${BOLD}>${RESET} Votre choix ${DIM}[0-2]${RESET} : "
   read -r SUBCHOIX
 
   case "$SUBCHOIX" in
@@ -961,15 +961,15 @@ menu_service() {
   echo -e "${BOLD}${BLUE}╔═════════════════════════════════════════════════════════╗${RESET}"
   echo -e "${BOLD}${BLUE}║${RESET}  ${CYAN}${BOLD}GESTION DU SERVICE SYSTEMD${RESET}                           ${BOLD}${BLUE}║${RESET}"
   echo -e "${BOLD}${BLUE}╠═════════════════════════════════════════════════════════╣${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[1]${RESET} 📊 Statut du service                            ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[2]${RESET} ▶️  Démarrer le service                          ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[3]${RESET} ⏹️  Arrêter le service                           ${BOLD}${BLUE}║${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[4]${RESET} 🔄 Redémarrer le service                        ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[1]${RESET} Statut du service                               ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[2]${RESET} Démarrer le service                             ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[3]${RESET} Arrêter le service                              ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${GREEN}[4]${RESET} Redémarrer le service                           ${BOLD}${BLUE}║${RESET}"
   echo -e "${BOLD}${BLUE}╠═════════════════════════════════════════════════════════╣${RESET}"
-  echo -e "${BOLD}${BLUE}║${RESET}  ${YELLOW}[0]${RESET} ↩️  Retour au menu principal                    ${BOLD}${BLUE}║${RESET}"
+  echo -e "${BOLD}${BLUE}║${RESET}  ${YELLOW}[0]${RESET} Retour au menu principal                       ${BOLD}${BLUE}║${RESET}"
   echo -e "${BOLD}${BLUE}╚═════════════════════════════════════════════════════════╝${RESET}"
   echo
-  echo -e -n "${CYAN}${BOLD}➜${RESET} Votre choix ${DIM}[0-4]${RESET} : "
+  echo -e -n "${CYAN}${BOLD}>${RESET} Votre choix ${DIM}[0-4]${RESET} : "
   read -r SUBCHOIX
 
   case "$SUBCHOIX" in
@@ -1011,14 +1011,14 @@ while true; do
     6) menu_service ;;
     0)
       echo
-      echo -e "${BOLD}${GREEN}✓ Merci d'avoir utilisé Sentinelize v2.0 !${RESET}"
-      echo -e "${DIM}À bientôt ! 👋${RESET}\n"
+      echo -e "${BOLD}${GREEN}Merci d'avoir utilisé Sentinelize v2.0 !${RESET}"
+      echo -e "${DIM}À bientôt !${RESET}\n"
       log_message "INFO" "Script terminé par l'utilisateur."
       exit 0
       ;;
     *)
       echo
-      echo -e "${BOLD}${RED}✗ Choix invalide !${RESET} Merci de saisir un numéro entre ${BOLD}0${RESET} et ${BOLD}6${RESET}."
+      echo -e "${BOLD}${RED}Choix invalide !${RESET} Merci de saisir un numéro entre ${BOLD}0${RESET} et ${BOLD}6${RESET}."
       log_message "WARN" "Choix invalide dans le menu : $CHOIX"
       echo
       echo -e "${CYAN}Appuyez sur ${BOLD}Entrée${RESET}${CYAN} pour continuer...${RESET}"
