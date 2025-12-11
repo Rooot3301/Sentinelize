@@ -172,16 +172,57 @@ installer_agent_rpm() {
   echo -e "${BOLD}${CYAN}│${RESET}  📦 ${BOLD}Installation de l'agent SentinelOne${RESET}          ${BOLD}${CYAN}│${RESET}"
   echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
   echo
-  read -rp "📂 Chemin vers le fichier RPM (.rpm) : " RPM_PATH
+  echo -e "${BOLD}Choisissez le mode d'installation :${RESET}"
+  echo -e "  ${GREEN}[1]${RESET} 📂 Fichier local (chemin)"
+  echo -e "  ${GREEN}[2]${RESET} 🌐 URL de téléchargement"
+  echo
+  read -rp "Votre choix [1-2] : " INSTALL_MODE
 
-  if [[ ! -f "$RPM_PATH" ]]; then
-    log_message "ERROR" "Le fichier spécifié n'existe pas : $RPM_PATH"
-    return 1
-  fi
+  local RPM_PATH=""
+  local TEMP_FILE=""
+
+  case "$INSTALL_MODE" in
+    1)
+      read -rp "📂 Chemin vers le fichier RPM (.rpm) : " RPM_PATH
+      if [[ ! -f "$RPM_PATH" ]]; then
+        log_message "ERROR" "Le fichier spécifié n'existe pas : $RPM_PATH"
+        return 1
+      fi
+      ;;
+    2)
+      read -rp "🌐 URL du fichier RPM : " RPM_URL
+      if [[ -z "$RPM_URL" ]]; then
+        log_message "ERROR" "URL vide, opération annulée."
+        return 1
+      fi
+
+      TEMP_FILE="/tmp/sentinelone-agent-$(date +%s).rpm"
+      log_message "INFO" "Téléchargement du RPM depuis : $RPM_URL"
+      echo -e "${CYAN}⬇️  Téléchargement en cours...${RESET}"
+
+      if ! curl -fL -o "$TEMP_FILE" "$RPM_URL"; then
+        log_message "ERROR" "Échec du téléchargement depuis $RPM_URL"
+        [[ -f "$TEMP_FILE" ]] && rm -f "$TEMP_FILE"
+        return 1
+      fi
+
+      RPM_PATH="$TEMP_FILE"
+      log_message "INFO" "Fichier téléchargé dans : $RPM_PATH"
+      ;;
+    *)
+      log_message "ERROR" "Choix invalide."
+      return 1
+      ;;
+  esac
 
   log_message "INFO" "Installation de l'agent via RPM : $RPM_PATH"
   sudo rpm -i "$RPM_PATH"
   local rc=$?
+
+  if [[ -n "$TEMP_FILE" ]] && [[ -f "$TEMP_FILE" ]]; then
+    rm -f "$TEMP_FILE"
+    log_message "DEBUG" "Fichier temporaire supprimé : $TEMP_FILE"
+  fi
 
   check_success_or_log "$rc" \
     "Échec de l'installation du paquet depuis $RPM_PATH" \
@@ -429,8 +470,8 @@ EOF
   echo -e "${DIM}═══════════════════════════════════════════════════════════════════════════════════════${RESET}"
   echo -e "${BOLD}Usage :${RESET} $0 ${DIM}[OPTION]${RESET}\n"
   echo -e "${BOLD}${BLUE}Options (mode CLI non-interactif) :${RESET}"
-  echo -e "  ${GREEN}--install-rpm${RESET} <chemin>   📦 Installer l'agent depuis un fichier RPM"
-  echo -e "  ${GREEN}--set-token${RESET} <token>      🔑 Définir le token de management"
+  echo -e "  ${GREEN}--install-rpm${RESET} <chemin|url>   📦 Installer l'agent (fichier local ou URL)"
+  echo -e "  ${GREEN}--set-token${RESET} <token>          🔑 Définir le token de management"
   echo -e "  ${GREEN}--status${RESET}                 📊 Afficher statut service + agent"
   echo -e "  ${GREEN}--health-check${RESET}           🏥 Lancer un health check complet"
   echo -e "  ${GREEN}--version${RESET}                ℹ️  Afficher la version de l'agent"
@@ -443,18 +484,46 @@ handle_cli() {
   case "$1" in
     --install-rpm)
       shift
-      RPM_PATH="$1"
-      if [[ -z "$RPM_PATH" ]]; then
-        echo "Erreur : chemin RPM manquant."
+      RPM_SOURCE="$1"
+      if [[ -z "$RPM_SOURCE" ]]; then
+        echo "Erreur : chemin ou URL RPM manquant."
         exit 1
       fi
-      log_message "INFO" "Mode CLI : installation RPM ($RPM_PATH)"
-      if [[ ! -f "$RPM_PATH" ]]; then
-        log_message "ERROR" "RPM introuvable : $RPM_PATH"
-        exit 1
+
+      local RPM_PATH=""
+      local TEMP_FILE=""
+
+      if [[ "$RPM_SOURCE" =~ ^https?:// ]]; then
+        log_message "INFO" "Mode CLI : installation RPM depuis URL ($RPM_SOURCE)"
+        TEMP_FILE="/tmp/sentinelone-agent-$(date +%s).rpm"
+        echo "Téléchargement en cours..."
+
+        if ! curl -fL -o "$TEMP_FILE" "$RPM_SOURCE"; then
+          log_message "ERROR" "Échec du téléchargement depuis $RPM_SOURCE"
+          [[ -f "$TEMP_FILE" ]] && rm -f "$TEMP_FILE"
+          exit 1
+        fi
+
+        RPM_PATH="$TEMP_FILE"
+        log_message "INFO" "Fichier téléchargé : $RPM_PATH"
+      else
+        log_message "INFO" "Mode CLI : installation RPM depuis fichier local ($RPM_SOURCE)"
+        if [[ ! -f "$RPM_SOURCE" ]]; then
+          log_message "ERROR" "RPM introuvable : $RPM_SOURCE"
+          exit 1
+        fi
+        RPM_PATH="$RPM_SOURCE"
       fi
+
       sudo rpm -i "$RPM_PATH"
-      exit $?
+      local rc=$?
+
+      if [[ -n "$TEMP_FILE" ]] && [[ -f "$TEMP_FILE" ]]; then
+        rm -f "$TEMP_FILE"
+        log_message "DEBUG" "Fichier temporaire supprimé"
+      fi
+
+      exit $rc
       ;;
     --set-token)
       shift
