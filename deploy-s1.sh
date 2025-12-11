@@ -1,15 +1,13 @@
 #!/bin/bash
-# ────────────────────────────────────────────────
+#
 # SentinelOne Agent Manager - RPM Edition
-# Auteur : Root3301
-# Version : v2.0
-# ────────────────────────────────────────────────
+# Author: Root3301
+# Version: 2.0
+#
 
 set -o pipefail
 
-############################################
-#             CONFIG PAR DÉFAUT            #
-############################################
+# Configuration par défaut
 
 S1CTL_DEFAULT="/opt/sentinelone/bin/sentinelctl"
 SERVICE_NAME_DEFAULT="sentinelone"          # À ADAPTER au vrai nom du service
@@ -33,9 +31,7 @@ AGENT_PACKAGE="${AGENT_PACKAGE:-$AGENT_PACKAGE_DEFAULT}"
 LOG_FILE="${LOG_FILE:-$LOG_FILE_DEFAULT}"
 LOG_LEVEL="${LOG_LEVEL:-$LOG_LEVEL_DEFAULT}"
 
-############################################
-#                 COULEURS                 #
-############################################
+# Couleurs
 
 GREEN="\e[32m"
 RED="\e[31m"
@@ -47,9 +43,7 @@ BOLD="\e[1m"
 DIM="\e[2m"
 RESET="\e[0m"
 
-############################################
-#                 BANNER                   #
-############################################
+# Banner
 
 banner() {
   clear
@@ -70,9 +64,7 @@ EOF
   echo -e "${DIM}═══════════════════════════════════════════════════════════════════════════════════════${RESET}\n"
 }
 
-############################################
-#          GESTION DES LOGS                #
-############################################
+# Gestion des logs
 
 rotate_logs() {
   # Rotation si > 1 Mo
@@ -142,13 +134,11 @@ check_success_or_log() {
   fi
 }
 
-############################################
-#          FONCTIONS UTILITAIRES           #
-############################################
+# Fonctions utilitaires
 
 check_root() {
   if [[ $EUID -ne 0 ]]; then
-    echo -e "${YELLOW}${BOLD}⚠${RESET} ${YELLOW} Script lancé sans privilèges root${RESET} ${DIM}- sudo sera utilisé automatiquement${RESET}"
+    echo -e "${YELLOW}${BOLD}[WARN]${RESET} ${YELLOW}Script lancé sans privilèges root${RESET} ${DIM}- sudo sera utilisé automatiquement${RESET}"
     log_message "WARN" "Le script n'est pas lancé en root. Certaines opérations utiliseront sudo."
     echo
   fi
@@ -162,9 +152,7 @@ check_s1ctl() {
   return 0
 }
 
-############################################
-#           ACTIONS PRINCIPALES           #
-############################################
+# Actions principales
 
 installer_agent_rpm() {
   echo
@@ -198,7 +186,7 @@ installer_agent_rpm() {
 
       TEMP_FILE="/tmp/sentinelone-agent-$(date +%s).rpm"
       log_message "INFO" "Téléchargement du RPM depuis : $RPM_URL"
-      echo -e "${CYAN}⬇️  Téléchargement en cours...${RESET}"
+      echo -e "${CYAN}Téléchargement en cours...${RESET}"
 
       if ! curl -fL -o "$TEMP_FILE" "$RPM_URL"; then
         log_message "ERROR" "Échec du téléchargement depuis $RPM_URL"
@@ -268,7 +256,7 @@ service_status() {
 
 service_start() {
   echo
-  echo -e "${CYAN}▶️  Démarrage du service ${BOLD}$SERVICE_NAME${RESET}${CYAN}...${RESET}"
+  echo -e "${CYAN}Démarrage du service ${BOLD}$SERVICE_NAME${RESET}${CYAN}...${RESET}"
   log_message "INFO" "Démarrage du service $SERVICE_NAME"
   sudo systemctl start "$SERVICE_NAME"
   local rc=$?
@@ -280,7 +268,7 @@ service_start() {
 
 service_stop() {
   echo
-  echo -e "${CYAN}⏹️  Arrêt du service ${BOLD}$SERVICE_NAME${RESET}${CYAN}...${RESET}"
+  echo -e "${CYAN}Arrêt du service ${BOLD}$SERVICE_NAME${RESET}${CYAN}...${RESET}"
   log_message "INFO" "Arrêt du service $SERVICE_NAME"
   sudo systemctl stop "$SERVICE_NAME"
   local rc=$?
@@ -292,7 +280,7 @@ service_stop() {
 
 service_restart() {
   echo
-  echo -e "${CYAN}🔄 Redémarrage du service ${BOLD}$SERVICE_NAME${RESET}${CYAN}...${RESET}"
+  echo -e "${CYAN}Redémarrage du service ${BOLD}$SERVICE_NAME${RESET}${CYAN}...${RESET}"
   log_message "INFO" "Redémarrage du service $SERVICE_NAME"
   sudo systemctl restart "$SERVICE_NAME"
   local rc=$?
@@ -450,9 +438,7 @@ health_check() {
   fi
 }
 
-############################################
-#      NOUVELLES FONCTIONS SENTINELCTL     #
-############################################
+# Fonctions SentinelCTL
 
 # Scan operations
 scan_start() {
@@ -661,9 +647,7 @@ management_detector() {
   return $rc
 }
 
-############################################
-#          MODE CLI (NON-INTERACTIF)       #
-############################################
+# Mode CLI (non-interactif)
 
 print_help() {
   echo -e "${BOLD}${CYAN}"
@@ -681,12 +665,12 @@ EOF
   echo -e "${DIM}═══════════════════════════════════════════════════════════════════════════════════════${RESET}"
   echo -e "${BOLD}Usage :${RESET} $0 ${DIM}[OPTION]${RESET}\n"
   echo -e "${BOLD}${BLUE}Options (mode CLI non-interactif) :${RESET}"
-  echo -e "  ${GREEN}--install-rpm${RESET} <chemin|url>   📦 Installer l'agent (fichier local ou URL)"
-  echo -e "  ${GREEN}--set-token${RESET} <token>          🔑 Définir le token de management"
-  echo -e "  ${GREEN}--status${RESET}                 📊 Afficher statut service + agent"
-  echo -e "  ${GREEN}--health-check${RESET}           🏥 Lancer un health check complet"
-  echo -e "  ${GREEN}--version${RESET}                ℹ️  Afficher la version de l'agent"
-  echo -e "  ${GREEN}--help${RESET}, ${GREEN}-h${RESET}               ❓ Afficher cette aide"
+  echo -e "  ${GREEN}--install-rpm${RESET} <chemin|url>   Installer l'agent (fichier local ou URL)"
+  echo -e "  ${GREEN}--set-token${RESET} <token>          Définir le token de management"
+  echo -e "  ${GREEN}--status${RESET}                     Afficher statut service + agent"
+  echo -e "  ${GREEN}--health-check${RESET}               Lancer un health check complet"
+  echo -e "  ${GREEN}--version${RESET}                    Afficher la version de l'agent"
+  echo -e "  ${GREEN}--help${RESET}, ${GREEN}-h${RESET}                   Afficher cette aide"
   echo
   echo -e "${DIM}Sans option, un menu interactif est affiché.${RESET}\n"
 }
@@ -776,9 +760,7 @@ handle_cli() {
   esac
 }
 
-############################################
-#             MENU INTERACTIF              #
-############################################
+# Menu interactif
 
 afficher_menu() {
   echo -e "${BOLD}${BLUE}╔═════════════════════════════════════════════════════════╗${RESET}"
@@ -986,9 +968,7 @@ menu_service() {
   read -r
 }
 
-############################################
-#                MAIN                      #
-############################################
+# Main
 
 check_root
 
@@ -1026,5 +1006,3 @@ while true; do
       ;;
   esac
 done
-
-
