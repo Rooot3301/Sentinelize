@@ -106,7 +106,7 @@ log_message() {
       ;;
   esac
 
-  rotate_logs()
+  rotate_logs
 
   local ts
   ts="$(date '+%Y-%m-%d %H:%M:%S')"
