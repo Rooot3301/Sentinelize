@@ -212,9 +212,42 @@ installer_agent_rpm() {
     log_message "DEBUG" "Fichier temporaire supprimé : $TEMP_FILE"
   fi
 
-  check_success_or_log "$rc" \
+  if ! check_success_or_log "$rc" \
     "Échec de l'installation du paquet depuis $RPM_PATH" \
-    "Agent installé avec succès depuis $RPM_PATH"
+    "Agent installé avec succès depuis $RPM_PATH"; then
+    return 1
+  fi
+
+  # Démarrage de l'agent après installation
+  echo
+  echo -e "${BOLD}${CYAN}Démarrage de l'agent...${RESET}"
+  log_message "INFO" "Démarrage de l'agent après installation"
+
+  if check_s1ctl; then
+    sudo "$S1CTL" control start
+    local start_rc=$?
+
+    if (( start_rc == 0 )); then
+      log_message "INFO" "Agent démarré avec succès"
+      echo -e "${GREEN}${BOLD}[OK]${RESET} ${GREEN}Agent démarré${RESET}"
+
+      # Affichage du statut de l'agent
+      echo
+      echo -e "${BOLD}${CYAN}┌─────────────────────────────────────────────────────┐${RESET}"
+      echo -e "${BOLD}${CYAN}│${RESET}  ${BOLD}Statut de l'agent${RESET}                                   ${BOLD}${CYAN}│${RESET}"
+      echo -e "${BOLD}${CYAN}└─────────────────────────────────────────────────────┘${RESET}"
+      echo
+      sudo "$S1CTL" control status
+      log_message "INFO" "Statut de l'agent affiché"
+    else
+      log_message "WARN" "Impossible de démarrer l'agent (rc=$start_rc)"
+      echo -e "${YELLOW}${BOLD}[WARN]${RESET} ${YELLOW}L'agent n'a pas pu être démarré automatiquement${RESET}"
+    fi
+  else
+    log_message "WARN" "sentinelctl non disponible, impossible de démarrer l'agent"
+  fi
+
+  echo
 }
 
 ajouter_token() {
@@ -718,7 +751,43 @@ handle_cli() {
         log_message "DEBUG" "Fichier temporaire supprimé"
       fi
 
-      exit $rc
+      if (( rc != 0 )); then
+        log_message "ERROR" "Échec de l'installation"
+        exit $rc
+      fi
+
+      log_message "INFO" "Agent installé avec succès"
+      echo "Installation réussie"
+
+      # Démarrage de l'agent après installation
+      echo
+      echo "Démarrage de l'agent..."
+      log_message "INFO" "Démarrage de l'agent après installation (mode CLI)"
+
+      if check_s1ctl; then
+        sudo "$S1CTL" control start
+        local start_rc=$?
+
+        if (( start_rc == 0 )); then
+          log_message "INFO" "Agent démarré avec succès"
+          echo "Agent démarré avec succès"
+
+          # Affichage du statut de l'agent
+          echo
+          echo "=== Statut de l'agent ==="
+          sudo "$S1CTL" control status
+          log_message "INFO" "Statut de l'agent affiché"
+          exit 0
+        else
+          log_message "WARN" "Impossible de démarrer l'agent (rc=$start_rc)"
+          echo "AVERTISSEMENT : L'agent n'a pas pu être démarré automatiquement"
+          exit $start_rc
+        fi
+      else
+        log_message "WARN" "sentinelctl non disponible"
+        echo "AVERTISSEMENT : sentinelctl non disponible, impossible de démarrer l'agent"
+        exit 1
+      fi
       ;;
     --set-token)
       shift
