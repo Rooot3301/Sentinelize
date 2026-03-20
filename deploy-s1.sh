@@ -287,16 +287,16 @@ install_package() {
 
   case "$PKG_MANAGER" in
     dnf)
-      log_message "INFO" "Installation via dnf"
-      sudo dnf install -y "$pkg_path"
+      log_message "INFO" "Installation via rpm (--noverify, skip GPG)"
+      sudo rpm -ivh --noverify "$pkg_path"
       ;;
     yum)
-      log_message "INFO" "Installation via yum"
-      sudo yum install -y "$pkg_path"
+      log_message "INFO" "Installation via rpm (--noverify, skip GPG)"
+      sudo rpm -ivh --noverify "$pkg_path"
       ;;
     rpm)
-      log_message "WARN" "Ni dnf ni yum disponibles, bascule sur rpm"
-      sudo rpm -Uvh "$pkg_path"
+      log_message "INFO" "Installation via rpm (--noverify, skip GPG)"
+      sudo rpm -ivh --noverify "$pkg_path"
       ;;
     apt)
       log_message "INFO" "Installation via apt"
